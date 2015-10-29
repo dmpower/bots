@@ -72,13 +72,15 @@ public class SuperWalls extends AdvancedRobot {
  
 		setMaxVelocity(Math.random() * 12);
  
-		if ((getRoundNum() == 0 || LGRating > HGRating) && getRoundNum() != 1){ // In the first round or when linear gun got more hitting percentage use linear targeting
+		if ((getRoundNum() == 0 || LGRating > HGRating) && getRoundNum() != 1){
+			// In the first round or when linear gun got more hitting percentage use linear targeting
 			double bulletPower = Math.min(3, e.getEnergy() / 4);
 			setTurnGunRightRadians(Utils.normalRelativeAngle(absBearing - getGunHeadingRadians() + Math.asin(latVel / (20 - 3 * bulletPower))));
 			LGShots++;
 			gunIdent = true;
 			setFire(bulletPower); // Fire the minimum amount of energy needed to finish off the other robot
-		} else { // in second round or when the head-on gun got more hitting percentage, use head-on gun.
+		} else {
+			// in second round or when the head-on gun got more hitting percentage, use head-on gun.
 			setTurnGunRightRadians(Utils.normalRelativeAngle(absBearing - getGunHeadingRadians()));
 			HGShots++;
 			gunIdent = false;
