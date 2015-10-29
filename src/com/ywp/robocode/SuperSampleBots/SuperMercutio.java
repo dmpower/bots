@@ -45,6 +45,7 @@ import robocode.util.*;
  */
  
 public class SuperMercutio extends AdvancedRobot {
+	final static int MAX_VELOCITY = (int) Rules.MAX_VELOCITY;
 	final static double FIRE_POWER=2;
 	final static double FIRE_SPEED=20-FIRE_POWER*3;
 	final static double BULLET_DAMAGE=10;
@@ -122,7 +123,7 @@ public class SuperMercutio extends AdvancedRobot {
 		 * Aiming our gun and firing
 		 */
 		setTurnGunRightRadians(Utils.normalRelativeAngle(absBearing-getGunHeadingRadians())
-				+gunAngles[8+(int)(e.getVelocity()*Math.sin(e.getHeadingRadians()-absBearing))]);
+				+gunAngles[MAX_VELOCITY+(int)(e.getVelocity()*Math.sin(e.getHeadingRadians()-absBearing))]);
 		setFire(FIRE_POWER);
  
 		setTurnRadarRightRadians(Utils.normalRelativeAngle(absBearing-getRadarHeadingRadians())*2);
@@ -219,6 +220,7 @@ public class SuperMercutio extends AdvancedRobot {
 		w.speed=FIRE_SPEED;
 		w.origin=new Point2D.Double(getX(),getY());
 		w.velSeg=(int)(e.getVelocity()*Math.sin(e.getHeadingRadians()-w.absBearing));
+		out.println("event velocity: " + e.getVelocity() + " for " + e.getName());
 		w.startTime=getTime();
 		gunWaves.add(w);
 	}
@@ -230,7 +232,8 @@ public class SuperMercutio extends AdvancedRobot {
 		for(int i=0;i<gunWaves.size();i++){
 			w=gunWaves.get(i);
 			if((getTime()-w.startTime)*w.speed>=w.origin.distance(ePos)){
-				gunAngles[w.velSeg+8]=Utils.normalRelativeAngle(Utils.normalAbsoluteAngle(Math.atan2(ePos.x-w.origin.x, ePos.y-w.origin.y))-w.absBearing);
+				gunAngles[w.velSeg+MAX_VELOCITY]=Utils.normalRelativeAngle(Utils.normalAbsoluteAngle(Math.atan2(ePos.x-w.origin.x, ePos.y-w.origin.y))-w.absBearing);
+				out.println("GunAngles[" + (w.velSeg+MAX_VELOCITY) + "]: " + gunAngles[w.velSeg+MAX_VELOCITY]);
 				gunWaves.remove(w);
 			}
 		}
