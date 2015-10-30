@@ -65,8 +65,8 @@ public class Starter extends AdvancedRobot {
 			double absBearing=event.getBearingRadians()+getHeadingRadians();
 			setTurnGunRightRadians(Utils.normalRelativeAngle(absBearing-getGunHeadingRadians()));
 			setFire(Math.min(2.4,Math.min(event.getEnergy()/4,getEnergy()/10)));
+			setTurnRadarRightRadians(Utils.normalRelativeAngle(absBearing-getRadarHeadingRadians())*2);
 		}
-
 	}
 
 	/* (non-Javadoc)
