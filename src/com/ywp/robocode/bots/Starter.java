@@ -4,10 +4,19 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.io.PrintStream;
 import java.util.ArrayList;
 
 import robocode.AdvancedRobot;
+import robocode.Robocode;
+import robocode.RobotDeathEvent;
+import robocode.Rules;
 import robocode.ScannedRobotEvent;
+import robocode.robotinterfaces.IAdvancedEvents;
+import robocode.robotinterfaces.IBasicEvents;
+import robocode.robotinterfaces.IInteractiveEvents;
+import robocode.robotinterfaces.IPaintEvents;
+import robocode.robotinterfaces.peer.IBasicRobotPeer;
 import robocode.util.Utils;
 
 import com.ywp.robocode.SuperSampleBots.SuperMercutio.GunWave;
@@ -19,13 +28,18 @@ public class Starter extends AdvancedRobot {
 	/*
 	 * change these statistics to see different graphics.
 	 */
-	final static boolean PAINT_MOVEMENT=false;
-	final static boolean PAINT_GUN=true;
+	final static boolean PAINT_MOVEMENT=true;
+	final static boolean PAINT_GUN=false;
+	
+	boolean isSweeping;
 
 	ArrayList<MovementWave> moveWaves=new ArrayList<MovementWave>();
 	ScannedRobotEvent currentTarget = null;
 	double lastTargetChange = 0d;
 	static final double targetChangeThreshold = 10d;
+	
+	double sweepTime = 0d;
+	static final double sweepInterval = 100d;
 	
 	double enemyEnergy = 0d;
 	
@@ -40,9 +54,8 @@ public class Starter extends AdvancedRobot {
  
 		//This is the best possible radar lock
 		while(true){
-			if(getRadarTurnRemainingRadians()==0){
-				setTurnRadarRightRadians(Double.POSITIVE_INFINITY);
-			}
+			out.println("New turn:" + getTime());
+			doRadar();
 			execute();
 		}
 	}
@@ -52,6 +65,7 @@ public class Starter extends AdvancedRobot {
 	 */
 	@Override
 	public void onScannedRobot(ScannedRobotEvent event) {
+		out.println("onScannedRobot turn: " + getTime());
 		pickTarget(event);
 		if (currentTarget.getName().equals(event.getName())) {
 			double energyChange=(enemyEnergy-(enemyEnergy=event.getEnergy()));
@@ -65,8 +79,9 @@ public class Starter extends AdvancedRobot {
 			double absBearing=event.getBearingRadians()+getHeadingRadians();
 			setTurnGunRightRadians(Utils.normalRelativeAngle(absBearing-getGunHeadingRadians()));
 			setFire(Math.min(2.4,Math.min(event.getEnergy()/4,getEnergy()/10)));
-			setTurnRadarRightRadians(Utils.normalRelativeAngle(absBearing-getRadarHeadingRadians())*2);
+			currentTarget = event;
 		}
+		chooseDirection(BotTools.convertToPoint(this, event));
 	}
 
 	/* (non-Javadoc)
@@ -85,12 +100,15 @@ public class Starter extends AdvancedRobot {
 				MovementWave w=moveWaves.get(i);
 				g.setColor(Color.blue);
 				radius=(getTime()-w.startTime)*w.speed+w.speed;
-				g.drawOval((int)(w.origin.x-radius),(int)(w.origin.y-radius),(int)radius*2,(int)radius*2);
 				Point2D.Double hotBullet=BotTools.project(w.origin,radius,w.angle);
 				Point2D.Double latBullet=BotTools.project(w.origin,radius,w.angle+w.latVel);
 				g.setColor(Color.red);
-				g.fillOval((int)hotBullet.x-3,(int)hotBullet.y-3,6,6);
-				g.fillOval((int)latBullet.x-3,(int)latBullet.y-3,6,6);
+				double sArc = Math.toDegrees(w.angle);
+				double eArc = Math.toDegrees(w.latVel);
+				g.drawArc((int)(w.origin.x-radius),(int)(w.origin.y-radius),(int)radius*2,(int)radius*2, (int)sArc, (int)eArc);
+				radius = 2d;
+				g.fillOval((int)(hotBullet.x-radius),(int)hotBullet.y-3,(int)(radius*2),(int)(radius*2));
+				g.fillOval((int)(latBullet.x-radius),(int)latBullet.y-3,(int)(radius*2),(int)(radius*2));
 			}
 		}
 		/*
@@ -104,6 +122,24 @@ public class Starter extends AdvancedRobot {
 //				g.drawOval((int)(w.origin.x-radius),(int)(w.origin.y-radius),(int)radius*2,(int)radius*2);
 //			}
 //		}
+		
+		if (currentTarget != null){
+			Point2D.Double selfPoint = BotTools.convertToPoint(this);
+			double absBearing=currentTarget.getBearingRadians()+this.getHeadingRadians();
+			Point2D.Double targetPoint = BotTools.project(selfPoint, currentTarget.getDistance()+getBattleFieldWidth()*2, absBearing);
+			g.setColor(Color.yellow);
+			g.drawLine((int)targetPoint.getX(), (int)targetPoint.getY(), (int)this.getX(), (int)this.getY());
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see robocode.Robot#onRobotDeath(robocode.RobotDeathEvent)
+	 */
+	@Override
+	public void onRobotDeath(RobotDeathEvent event) {
+		if (currentTarget.getName().equals(event.getName())){
+			currentTarget = null;
+		}
 	}
 
 	/*
@@ -188,9 +224,12 @@ public class Starter extends AdvancedRobot {
 			setTarget(target);
 		}
 		
-		if (lastTargetChange + targetChangeThreshold > this.getTime()) {
+		if ((lastTargetChange + targetChangeThreshold) < this.getTime()) {
+			out.println("Time to change target.");
 			if (! currentTarget.getName().equals(target.getName())) {
+				out.println("  New Target Found");
 				if (target.getDistance() < currentTarget.getDistance()) {
+					out.println("    New Target is closer");
 					setTarget(target);
 				}
 			}
@@ -201,5 +240,34 @@ public class Starter extends AdvancedRobot {
 		currentTarget = target;
 		lastTargetChange = this.getTime();
 		enemyEnergy = target.getEnergy();		
+	}
+	
+	private void doRadar(){
+		double currentTime = getTime();
+		out.println("Rader turn: " + currentTime + " remaining turn: " + getRadarTurnRemainingRadians());
+		if(Math.abs(getRadarTurnRemainingRadians())< (Math.PI/32)){
+			out.println("Radar completed turn");
+			// basically if there is only a little bit of turn remaining, we want to turn
+			// the radar back anyways. Otherwise the radar stops mid turn and we lose most
+			// of the radar's time sitting still.
+			
+			// note: we use POSITIVE_INFINITY instead of Rules.RADAR_TURN_RATE_RADIANS/2
+			// because if there is a slip we will keep turning until we find a robot.
+			setTurnRadarRightRadians(Double.POSITIVE_INFINITY);
+			isSweeping = false;
+		}
+
+		if(!isSweeping && currentTarget != null && currentTarget.getTime() == currentTime){
+			out.println("Radar scanned bot, turn back");
+			double absBearing=currentTarget.getBearingRadians()+getHeadingRadians();
+			setTurnRadarRightRadians(Utils.normalRelativeAngle(absBearing-getRadarHeadingRadians())-(Rules.RADAR_TURN_RATE_RADIANS/2));
+		}
+		
+		if (sweepTime == 0 || sweepTime+sweepInterval < currentTime){
+			out.println("Radar sweeping");
+			isSweeping = true;
+			sweepTime = currentTime+1;
+			setTurnRadarRightRadians(Math.PI*2); // full circle
+		}
 	}
  }
