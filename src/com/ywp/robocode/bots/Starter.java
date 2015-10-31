@@ -61,7 +61,7 @@ public class Starter extends AdvancedRobot {
 	 */
 	@Override
 	public void onScannedRobot(ScannedRobotEvent event) {
-		out.println("onScannedRobot turn: " + getTime());
+		//		out.println("onScannedRobot turn: " + getTime());
 		TargetBot target = new TargetBot(event);
 		pickTarget(target);
 		if (currentTarget.getName().equals(target.getName())) {
@@ -236,6 +236,11 @@ public class Starter extends AdvancedRobot {
 				//				out.println("  New Target Found");
 				if (target.getDistance() < currentTarget.getDistance()) {
 					//					out.println("    New Target is closer");
+					setTarget(target);
+				}
+
+				if (target.getEnergy() == 0d){
+					// take a pot shot
 					setTarget(target);
 				}
 			}
