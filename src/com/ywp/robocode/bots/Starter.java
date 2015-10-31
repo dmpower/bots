@@ -48,6 +48,7 @@ public class Starter extends AdvancedRobot {
 		while(true){
 			//			out.println("New turn:" + getTime());
 			doRadar();
+			doGun();
 			execute();
 		}
 	}
@@ -65,12 +66,6 @@ public class Starter extends AdvancedRobot {
 				logMovementWave(event,energyChange);
 			}
 
-			/*
-			 * Aiming our gun and firing
-			 */
-			double absBearing=event.getBearingRadians()+getHeadingRadians();
-			setTurnGunRightRadians(Utils.normalRelativeAngle(absBearing-getGunHeadingRadians()));
-			setFire(Math.min(2.4,Math.min(event.getEnergy()/4,getEnergy()/10)));
 			currentTarget = event;
 		}
 		chooseDirection(BotTools.convertToPoint(this, event));
@@ -262,5 +257,16 @@ public class Starter extends AdvancedRobot {
 			isSweeping = false;
 		}
 
+	}
+
+	private void doGun(){
+		/*
+		 * Aiming our gun and firing
+		 */
+		if (currentTarget != null){
+			double absBearing=currentTarget.getBearingRadians()+getHeadingRadians();
+			setTurnGunRightRadians(Utils.normalRelativeAngle(absBearing-getGunHeadingRadians()));
+			setFire(Math.min(2.4,Math.min(currentTarget.getEnergy()/4,getEnergy()/10)));
+		}
 	}
 }
