@@ -65,12 +65,12 @@ public class Starter extends AdvancedRobot {
 		TargetBot target = new TargetBot(event);
 		pickTarget(target);
 		if (currentTarget.getName().equals(target.getName())) {
-			double energyChange=(enemyEnergy-(enemyEnergy=target.getEnergy()));
+			double energyChange=(enemyEnergy-target.getEnergy());
 			if(energyChange<=3&&energyChange>=0.1){
 				logMovementWave(target,energyChange);
 			}
 
-			currentTarget = target;
+			updateTarget(target);
 		}
 	}
 
@@ -113,7 +113,7 @@ public class Starter extends AdvancedRobot {
 		//			}
 		//		}
 
-		if (currentTarget != null){
+		if (hasTarget()){
 			Point2D.Double selfPoint = BotTools.convertToPoint(this);
 			double absBearing=currentTarget.getBearingRadians()+this.getHeadingRadians();
 			Point2D.Double targetPoint = BotTools.project(selfPoint, currentTarget.getDistance()+getBattleFieldWidth()*2, absBearing);
@@ -128,7 +128,7 @@ public class Starter extends AdvancedRobot {
 	@Override
 	public void onRobotDeath(RobotDeathEvent event) {
 		if (currentTarget.getName().equals(event.getName())){
-			currentTarget = null;
+			clearTarget();
 		}
 	}
 
@@ -162,7 +162,7 @@ public class Starter extends AdvancedRobot {
 	 * It is the core of our movement.
 	 */
 	public void doMove(){
-		if(currentTarget != null){
+		if(hasTarget()){
 			Point2D.Double enemyLocation = BotTools.convertToPoint(this, currentTarget);
 			MovementWave w;
 			//This for loop rates each angle individually
@@ -221,7 +221,7 @@ public class Starter extends AdvancedRobot {
 	}
 
 	private void pickTarget(TargetBot target) {
-		if (currentTarget == null) {
+		if (!hasTarget()) {
 			setTarget(target);
 		}
 
@@ -243,6 +243,20 @@ public class Starter extends AdvancedRobot {
 		enemyEnergy = target.getEnergy();
 	}
 
+	private void updateTarget (TargetBot target) {
+		currentTarget = target;
+		enemyEnergy = target.getEnergy();
+	}
+
+	private void clearTarget(){
+		currentTarget = null;
+		enemyEnergy = 0d;
+	}
+
+	private boolean hasTarget(){
+		return currentTarget != null;
+	}
+
 	private void doRadar(){
 		double currentTime = getTime();
 		//		out.println("Rader turn: " + currentTime + " remaining turn: " + getRadarTurnRemainingRadians());
@@ -253,7 +267,7 @@ public class Starter extends AdvancedRobot {
 			setTurnRadarRightRadians(Math.PI*2); // full circle
 		}
 
-		if(!isSweeping && currentTarget != null && currentTarget.getTime() == currentTime){
+		if(!isSweeping && hasTarget() && currentTarget.getTime() == currentTime){
 			//			out.println("Radar scanned bot, turn back");
 			double absBearing=currentTarget.getBearingRadians()+getHeadingRadians();
 			setTurnRadarRightRadians(Utils.normalRelativeAngle(absBearing-getRadarHeadingRadians())-(Rules.RADAR_TURN_RATE_RADIANS/2));
@@ -277,7 +291,7 @@ public class Starter extends AdvancedRobot {
 		/*
 		 * Aiming our gun and firing
 		 */
-		if (currentTarget != null){
+		if (hasTarget()){
 			double absBearing=currentTarget.getBearingRadians()+getHeadingRadians();
 			setTurnGunRightRadians(Utils.normalRelativeAngle(absBearing-getGunHeadingRadians()));
 			setFire(Math.min(2.4,Math.min(currentTarget.getEnergy()/4,getEnergy()/10)));
