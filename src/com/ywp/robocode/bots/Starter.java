@@ -4,24 +4,16 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
-import java.io.PrintStream;
 import java.util.ArrayList;
 
+import com.ywp.robocode.utils.BotTools;
+import com.ywp.robocode.utils.MovementWave;
+
 import robocode.AdvancedRobot;
-import robocode.Robocode;
 import robocode.RobotDeathEvent;
 import robocode.Rules;
 import robocode.ScannedRobotEvent;
-import robocode.robotinterfaces.IAdvancedEvents;
-import robocode.robotinterfaces.IBasicEvents;
-import robocode.robotinterfaces.IInteractiveEvents;
-import robocode.robotinterfaces.IPaintEvents;
-import robocode.robotinterfaces.peer.IBasicRobotPeer;
 import robocode.util.Utils;
-
-import com.ywp.robocode.SuperSampleBots.SuperMercutio.GunWave;
-import com.ywp.robocode.utils.BotTools;
-import com.ywp.robocode.utils.MovementWave;
 
 public class Starter extends AdvancedRobot {
 
@@ -30,19 +22,19 @@ public class Starter extends AdvancedRobot {
 	 */
 	final static boolean PAINT_MOVEMENT=true;
 	final static boolean PAINT_GUN=false;
-	
+
 	boolean isSweeping;
 
 	ArrayList<MovementWave> moveWaves=new ArrayList<MovementWave>();
 	ScannedRobotEvent currentTarget = null;
 	double lastTargetChange = 0d;
-	static final double targetChangeThreshold = 10d;
-	
+	static final double targetChangeThreshold = 20d;
+
 	double sweepTime = 0d;
 	static final double sweepInterval = 100d;
-	
+
 	double enemyEnergy = 0d;
-	
+
 	/* (non-Javadoc)
 	 * @see robocode.Robot#run()
 	 */
@@ -51,7 +43,7 @@ public class Starter extends AdvancedRobot {
 		setAdjustGunForRobotTurn(true);
 		setAdjustRadarForGunTurn(true);
 		setColors(Color.red,Color.yellow,Color.blue);
- 
+
 		//This is the best possible radar lock
 		while(true){
 			out.println("New turn:" + getTime());
@@ -72,7 +64,7 @@ public class Starter extends AdvancedRobot {
 			if(energyChange<=3&&energyChange>=0.1){
 				logMovementWave(event,energyChange);
 			}
-			
+
 			/*
 			 * Aiming our gun and firing
 			 */
@@ -91,7 +83,7 @@ public class Starter extends AdvancedRobot {
 	public void onPaint(Graphics2D g) {
 		// TODO Auto-generated method stub
 		double radius;
-		 
+
 		/*
 		 * Paints the waves and the imaginary bullets from the movement.
 		 */
@@ -114,15 +106,15 @@ public class Starter extends AdvancedRobot {
 		/*
 		 * Just paints the waves for the targeting.
 		 */
-//		if(PAINT_GUN){
-//			for(int i=0;i<gunWaves.size();i++){
-//				GunWave w=gunWaves.get(i);
-//				g.setColor(Color.blue);
-//				radius=(getTime()-w.startTime)*w.speed;
-//				g.drawOval((int)(w.origin.x-radius),(int)(w.origin.y-radius),(int)radius*2,(int)radius*2);
-//			}
-//		}
-		
+		//		if(PAINT_GUN){
+		//			for(int i=0;i<gunWaves.size();i++){
+		//				GunWave w=gunWaves.get(i);
+		//				g.setColor(Color.blue);
+		//				radius=(getTime()-w.startTime)*w.speed;
+		//				g.drawOval((int)(w.origin.x-radius),(int)(w.origin.y-radius),(int)radius*2,(int)radius*2);
+		//			}
+		//		}
+
 		if (currentTarget != null){
 			Point2D.Double selfPoint = BotTools.convertToPoint(this);
 			double absBearing=currentTarget.getBearingRadians()+this.getHeadingRadians();
@@ -177,17 +169,17 @@ public class Starter extends AdvancedRobot {
 		double bestRating=Double.POSITIVE_INFINITY;
 		for(double moveAngle=0;moveAngle<Math.PI*2;moveAngle+=Math.PI/16D){
 			double rating=0;
- 
-			//Movepoint is position we would be at if we were to move one robot-length in the given direction. 
+
+			//Movepoint is position we would be at if we were to move one robot-length in the given direction.
 			Point2D.Double movePoint=BotTools.project(new Point2D.Double(getX(),getY()),36,moveAngle);
- 
+
 			/*
 			 * This loop will iterate through each wave and add a risk for the simulated bullets on each one
 			 * to the total risk for this angle.
 			 */
 			for(int i=0;i<moveWaves.size();i++){
 				w=moveWaves.get(i);
- 
+
 				//This part will remove waves that have passed our robot, so we no longer keep taking into account old ones
 				if(new Point2D.Double(getX(),getY()).distance(w.origin)<(getTime()-w.startTime)*w.speed+w.speed){
 					moveWaves.remove(w);
@@ -209,7 +201,7 @@ public class Starter extends AdvancedRobot {
 			if(rating<bestRating && new Rectangle2D.Double(50,50,getBattleFieldWidth()-100,getBattleFieldHeight()-100).contains(movePoint)){
 				bestRating=rating;
 				/*
-				 * These next three lines are a very codesize-efficient way to 
+				 * These next three lines are a very codesize-efficient way to
 				 * choose the best direction for moving to a point.
 				 */
 				int pointDir;
@@ -218,12 +210,12 @@ public class Starter extends AdvancedRobot {
 			}
 		}// end for
 	}
-	
+
 	private void pickTarget(ScannedRobotEvent target) {
 		if (currentTarget == null) {
 			setTarget(target);
 		}
-		
+
 		if ((lastTargetChange + targetChangeThreshold) < this.getTime()) {
 			out.println("Time to change target.");
 			if (! currentTarget.getName().equals(target.getName())) {
@@ -235,26 +227,21 @@ public class Starter extends AdvancedRobot {
 			}
 		}
 	}
-	
+
 	private void setTarget (ScannedRobotEvent target) {
 		currentTarget = target;
 		lastTargetChange = this.getTime();
-		enemyEnergy = target.getEnergy();		
+		enemyEnergy = target.getEnergy();
 	}
-	
+
 	private void doRadar(){
 		double currentTime = getTime();
 		out.println("Rader turn: " + currentTime + " remaining turn: " + getRadarTurnRemainingRadians());
-		if(Math.abs(getRadarTurnRemainingRadians())< (Math.PI/32)){
-			out.println("Radar completed turn");
-			// basically if there is only a little bit of turn remaining, we want to turn
-			// the radar back anyways. Otherwise the radar stops mid turn and we lose most
-			// of the radar's time sitting still.
-			
-			// note: we use POSITIVE_INFINITY instead of Rules.RADAR_TURN_RATE_RADIANS/2
-			// because if there is a slip we will keep turning until we find a robot.
-			setTurnRadarRightRadians(Double.POSITIVE_INFINITY);
-			isSweeping = false;
+		if (getOthers() > 1 && (sweepTime == 0 || sweepTime+sweepInterval < currentTime)){
+			out.println("Radar sweeping");
+			isSweeping = true;
+			sweepTime = currentTime+1;
+			setTurnRadarRightRadians(Math.PI*2); // full circle
 		}
 
 		if(!isSweeping && currentTarget != null && currentTarget.getTime() == currentTime){
@@ -262,12 +249,18 @@ public class Starter extends AdvancedRobot {
 			double absBearing=currentTarget.getBearingRadians()+getHeadingRadians();
 			setTurnRadarRightRadians(Utils.normalRelativeAngle(absBearing-getRadarHeadingRadians())-(Rules.RADAR_TURN_RATE_RADIANS/2));
 		}
-		
-		if (sweepTime == 0 || sweepTime+sweepInterval < currentTime){
-			out.println("Radar sweeping");
-			isSweeping = true;
-			sweepTime = currentTime+1;
-			setTurnRadarRightRadians(Math.PI*2); // full circle
+
+		if(Math.abs(getRadarTurnRemainingRadians())< (Math.PI/32)){
+			out.println("Radar completed turn");
+			// basically if there is only a little bit of turn remaining, we want to turn
+			// the radar back anyways. Otherwise the radar stops mid turn and we lose most
+			// of the radar's time sitting still.
+
+			// note: we use POSITIVE_INFINITY instead of Rules.RADAR_TURN_RATE_RADIANS/2
+			// because if there is a slip we will keep turning until we find a robot.
+			setTurnRadarRightRadians(Double.POSITIVE_INFINITY);
+			isSweeping = false;
 		}
+
 	}
- }
+}
