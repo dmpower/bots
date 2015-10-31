@@ -23,11 +23,17 @@ public class TargetBot {
 	}
 
 	public TargetBot(HitRobotEvent event){
+		// 36 came from Robot.WIDTH but it is a private final variable accessed by getWidth().
+		this(event,36);
+	}
+
+	public TargetBot(HitRobotEvent event, int botWidth){
 		name = event.getName();
 		energy = event.getEnergy();
 		heading = 0d;
 		bearing = event.getBearingRadians();
-		distance = 0d;
+		// This is not entirely accurate, but it helps
+		distance = botWidth;
 		velocity = 0d;
 		time = event.getTime();
 	}
