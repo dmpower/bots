@@ -46,7 +46,7 @@ public class Starter extends AdvancedRobot {
 
 		//This is the best possible radar lock
 		while(true){
-			out.println("New turn:" + getTime());
+			//			out.println("New turn:" + getTime());
 			doRadar();
 			execute();
 		}
@@ -217,11 +217,11 @@ public class Starter extends AdvancedRobot {
 		}
 
 		if ((lastTargetChange + targetChangeThreshold) < this.getTime()) {
-			out.println("Time to change target.");
+			//			out.println("Time to change target.");
 			if (! currentTarget.getName().equals(target.getName())) {
-				out.println("  New Target Found");
+				//				out.println("  New Target Found");
 				if (target.getDistance() < currentTarget.getDistance()) {
-					out.println("    New Target is closer");
+					//					out.println("    New Target is closer");
 					setTarget(target);
 				}
 			}
@@ -236,22 +236,22 @@ public class Starter extends AdvancedRobot {
 
 	private void doRadar(){
 		double currentTime = getTime();
-		out.println("Rader turn: " + currentTime + " remaining turn: " + getRadarTurnRemainingRadians());
+		//		out.println("Rader turn: " + currentTime + " remaining turn: " + getRadarTurnRemainingRadians());
 		if (getOthers() > 1 && (sweepTime == 0 || sweepTime+sweepInterval < currentTime)){
-			out.println("Radar sweeping");
+			//			out.println("Radar sweeping");
 			isSweeping = true;
 			sweepTime = currentTime+1;
 			setTurnRadarRightRadians(Math.PI*2); // full circle
 		}
 
 		if(!isSweeping && currentTarget != null && currentTarget.getTime() == currentTime){
-			out.println("Radar scanned bot, turn back");
+			//			out.println("Radar scanned bot, turn back");
 			double absBearing=currentTarget.getBearingRadians()+getHeadingRadians();
 			setTurnRadarRightRadians(Utils.normalRelativeAngle(absBearing-getRadarHeadingRadians())-(Rules.RADAR_TURN_RATE_RADIANS/2));
 		}
 
 		if(Math.abs(getRadarTurnRemainingRadians())< (Math.PI/32)){
-			out.println("Radar completed turn");
+			//			out.println("Radar completed turn");
 			// basically if there is only a little bit of turn remaining, we want to turn
 			// the radar back anyways. Otherwise the radar stops mid turn and we lose most
 			// of the radar's time sitting still.
