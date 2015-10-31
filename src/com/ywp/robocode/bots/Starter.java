@@ -217,6 +217,7 @@ public class Starter extends AdvancedRobot {
 	 */
 	@Override
 	public void onHitRobot(HitRobotEvent event) {
+		// target who hit us
 		setTarget(new TargetBot(event));
 	}
 
@@ -238,9 +239,8 @@ public class Starter extends AdvancedRobot {
 	}
 
 	private void setTarget (TargetBot target) {
-		currentTarget = target;
+		updateTarget(target);
 		lastTargetChange = this.getTime();
-		enemyEnergy = target.getEnergy();
 	}
 
 	private void updateTarget (TargetBot target) {
