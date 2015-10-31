@@ -221,6 +221,10 @@ public class Starter extends AdvancedRobot {
 		setTarget(new TargetBot(event));
 	}
 
+	/**
+	 * This does the logic to pick the bot to target.
+	 * @param target - newly discovered target
+	 */
 	private void pickTarget(TargetBot target) {
 		if (!hasTarget()) {
 			setTarget(target);
@@ -238,16 +242,30 @@ public class Starter extends AdvancedRobot {
 		}
 	}
 
+	/**
+	 * This is used when a new target is selected
+	 *
+	 * @param target - the new target
+	 */
 	private void setTarget (TargetBot target) {
 		updateTarget(target);
 		lastTargetChange = this.getTime();
 	}
 
+	/**
+	 * This is use to refresh the target's information. It is assumed this is not
+	 * changing the target. For changing the target see setTarget()
+	 *
+	 * @param target - updated information for target
+	 */
 	private void updateTarget (TargetBot target) {
 		currentTarget = target;
 		enemyEnergy = target.getEnergy();
 	}
 
+	/**
+	 * This is used when the current target is not longer valid.
+	 */
 	private void clearTarget(){
 		currentTarget = null;
 		enemyEnergy = 0d;
