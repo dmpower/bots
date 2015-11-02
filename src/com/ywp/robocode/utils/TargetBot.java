@@ -3,7 +3,7 @@ package com.ywp.robocode.utils;
 import robocode.HitRobotEvent;
 import robocode.ScannedRobotEvent;
 
-public class TargetBot {
+public class TargetBot implements RepositoryEntry<TargetBot>{
 	private final String name;
 	private final double energy;
 	private final double heading;
@@ -13,13 +13,13 @@ public class TargetBot {
 	private final double time;
 
 	public TargetBot(ScannedRobotEvent event){
-		name = event.getName();
-		energy = event.getEnergy();
-		heading = event.getHeadingRadians();
-		bearing = event.getBearingRadians();
-		distance = event.getDistance();
-		velocity = event.getVelocity();
-		time = event.getTime();
+		this.name = event.getName();
+		this.energy = event.getEnergy();
+		this.heading = event.getHeadingRadians();
+		this.bearing = event.getBearingRadians();
+		this.distance = event.getDistance();
+		this.velocity = event.getVelocity();
+		this.time = event.getTime();
 	}
 
 	public TargetBot(HitRobotEvent event){
@@ -28,14 +28,14 @@ public class TargetBot {
 	}
 
 	public TargetBot(HitRobotEvent event, int botWidth){
-		name = event.getName();
-		energy = event.getEnergy();
-		heading = 0d;
-		bearing = event.getBearingRadians();
+		this.name = event.getName();
+		this.energy = event.getEnergy();
+		this.heading = 0d;
+		this.bearing = event.getBearingRadians();
 		// This is not entirely accurate, but it helps
-		distance = botWidth;
-		velocity = 0d;
-		time = event.getTime();
+		this.distance = botWidth;
+		this.velocity = 0d;
+		this.time = event.getTime();
 	}
 
 	/**
@@ -45,7 +45,7 @@ public class TargetBot {
 	 * @return the bearing to the robot you scanned, in degrees
 	 */
 	public double getBearing() {
-		return bearing * 180.0 / Math.PI;
+		return this.bearing * 180.0 / Math.PI;
 	}
 
 	/**
@@ -55,7 +55,7 @@ public class TargetBot {
 	 * @return the bearing to the robot you scanned, in radians
 	 */
 	public double getBearingRadians() {
-		return bearing;
+		return this.bearing;
 	}
 
 	/**
@@ -64,7 +64,7 @@ public class TargetBot {
 	 * @return the distance to the robot.
 	 */
 	public double getDistance() {
-		return distance;
+		return this.distance;
 	}
 
 	/**
@@ -73,7 +73,7 @@ public class TargetBot {
 	 * @return the energy of the robot
 	 */
 	public double getEnergy() {
-		return energy;
+		return this.energy;
 	}
 
 	/**
@@ -82,7 +82,7 @@ public class TargetBot {
 	 * @return the heading of the robot, in degrees
 	 */
 	public double getHeading() {
-		return heading * 180.0 / Math.PI;
+		return this.heading * 180.0 / Math.PI;
 	}
 
 	/**
@@ -91,7 +91,7 @@ public class TargetBot {
 	 * @return the heading of the robot, in radians
 	 */
 	public double getHeadingRadians() {
-		return heading;
+		return this.heading;
 	}
 
 	/**
@@ -100,7 +100,7 @@ public class TargetBot {
 	 * @return the name of the robot
 	 */
 	public String getName() {
-		return name;
+		return this.name;
 	}
 
 	/**
@@ -109,7 +109,7 @@ public class TargetBot {
 	 * @return the velocity of the robot
 	 */
 	public double getVelocity() {
-		return velocity;
+		return this.velocity;
 	}
 
 	/**
@@ -118,8 +118,33 @@ public class TargetBot {
 	 * @return the time the target was seen
 	 */
 	public double getTime() {
-		return time;
+		return this.time;
 	}
+
+	/* (non-Javadoc)
+	 * @see com.ywp.robocode.utils.RepositoryEntry#getSortId()
+	 */
+	@Override
+	public String getSortId() {
+		return this.name;
+	}
+
+	/* (non-Javadoc)
+	 * @see com.ywp.robocode.utils.RepositoryEntry#getUniqueId()
+	 */
+	@Override
+	public String getUniqueId() {
+		return this.name + this.time;
+	}
+
+	/* (non-Javadoc)
+	 * @see com.ywp.robocode.utils.RepositoryEntry#getData()
+	 */
+	@Override
+	public TargetBot getData() {
+		return this;
+	}
+
 
 
 }
