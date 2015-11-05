@@ -8,7 +8,8 @@ package com.ywp.robocode.utils;
  *
  */
 public interface RepositoryEntry <E> {
-	String getSortId();
+
+	String getGroupId();
 
 	String getUniqueId();
 

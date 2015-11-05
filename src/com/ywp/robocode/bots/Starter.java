@@ -8,6 +8,7 @@ import java.util.ArrayList;
 
 import com.ywp.robocode.utils.BotTools;
 import com.ywp.robocode.utils.MovementWave;
+import com.ywp.robocode.utils.RepositoryManager;
 import com.ywp.robocode.utils.TargetBot;
 
 import robocode.AdvancedRobot;
@@ -34,6 +35,7 @@ public class Starter extends AdvancedRobot {
 
 	double sweepTime = 0d;
 	static final double sweepInterval = 100d;
+	RepositoryManager<TargetBot> targetManager;
 
 	double enemyEnergy = 0d;
 
@@ -45,6 +47,8 @@ public class Starter extends AdvancedRobot {
 		setAdjustGunForRobotTurn(true);
 		setAdjustRadarForGunTurn(true);
 		setColors(Color.red,Color.yellow,Color.blue);
+
+		this.targetManager = new RepositoryManager<TargetBot>(15);
 
 		//This is the best possible radar lock
 		while(true){

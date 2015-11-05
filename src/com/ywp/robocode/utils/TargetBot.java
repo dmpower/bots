@@ -122,10 +122,10 @@ public class TargetBot implements RepositoryEntry<TargetBot>{
 	}
 
 	/* (non-Javadoc)
-	 * @see com.ywp.robocode.utils.RepositoryEntry#getSortId()
+	 * @see com.ywp.robocode.utils.RepositoryEntry#getGroupId()
 	 */
 	@Override
-	public String getSortId() {
+	public String getGroupId() {
 		return this.name;
 	}
 

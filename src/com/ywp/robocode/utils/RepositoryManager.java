@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Vector;
 
 /**
  * @author dpower
@@ -28,19 +29,19 @@ public class RepositoryManager <E> {
 	public void add(RepositoryEntry <E> newEntry){
 		boolean isPresent = false;
 
-		if (this.repository.containsKey(newEntry.getSortId())){
-			for ( RepositoryEntry<E> currentEntry: this.repository.get(newEntry.getSortId())) {
+		if (this.repository.containsKey(newEntry.getGroupId())){
+			for ( RepositoryEntry<E> currentEntry: this.repository.get(newEntry.getGroupId())) {
 				if(currentEntry.getUniqueId().equals(newEntry.getUniqueId())){
 					isPresent = true;
 					break;
 				}
 			}
 		} else{
-			this.repository.put(newEntry.getSortId(), new LinkedList<RepositoryEntry<E>>());
+			this.repository.put(newEntry.getGroupId(), new LinkedList<RepositoryEntry<E>>());
 		}
 
 		if (!isPresent){
-			Queue<RepositoryEntry<E>> tempQueue = this.repository.get(newEntry.getSortId());
+			Queue<RepositoryEntry<E>> tempQueue = this.repository.get(newEntry.getGroupId());
 			tempQueue.offer(newEntry);
 			if ( this.threshHold < tempQueue.size()){
 				tempQueue.remove();
@@ -50,14 +51,14 @@ public class RepositoryManager <E> {
 	}
 
 	public void removeAll(RepositoryEntry<E> sample){
-		Queue<RepositoryEntry<E>> tempQueue = this.repository.remove(sample.getSortId());
+		Queue<RepositoryEntry<E>> tempQueue = this.repository.remove(sample.getGroupId());
 		if (null != tempQueue){
 			tempQueue.clear();
 		}
 	}
 
 	public void remove(RepositoryEntry<E> target){
-		Queue<RepositoryEntry<E>> tempQueue = this.repository.get(target.getUniqueId());
+		Queue<RepositoryEntry<E>> tempQueue = this.repository.get(target.getGroupId());
 		if (null != tempQueue){
 			for ( RepositoryEntry<E> currentEntry: tempQueue) {
 				if(currentEntry.getUniqueId().equals(target.getUniqueId())){
@@ -66,5 +67,33 @@ public class RepositoryManager <E> {
 				}
 			}
 		}
+	}
+
+	public Vector<E> getAll (RepositoryEntry<E> sample){
+		Queue<RepositoryEntry<E>> tempQueue = this.repository.get(sample.getGroupId());
+		Vector<E> results = new Vector<E>();
+		if (null != tempQueue){
+			for ( RepositoryEntry<E> currentEntry: tempQueue) {
+				results.addElement(currentEntry.getData());
+			}
+		}
+
+		return results;
+	}
+
+	public E get (RepositoryEntry<E> sample){
+		Queue<RepositoryEntry<E>> tempQueue = this.repository.get(sample.getGroupId());
+		E results = null;
+		if (null != tempQueue){
+			for ( RepositoryEntry<E> currentEntry: tempQueue) {
+				if (sample.getUniqueId().equals(currentEntry.getUniqueId())){
+					results = currentEntry.getData();
+					break;
+				}
+			}
+		}
+
+		return results;
+
 	}
 }
