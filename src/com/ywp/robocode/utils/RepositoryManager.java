@@ -52,16 +52,15 @@ public class RepositoryManager <E> {
 	}
 
 	public void removeAll(RepositoryEntry<E> sample){
-		Queue<RepositoryEntry<E>> tempQueue = this.repository.remove(sample.getGroupId());
-		if (null != tempQueue){
-			tempQueue.clear();
+		if (this.repository.containsKey(sample.getGroupId())){
+			this.repository.get(sample.getGroupId()).clear();
 		}
 	}
 
 	public void remove(RepositoryEntry<E> target){
-		Queue<RepositoryEntry<E>> tempQueue = this.repository.get(target.getGroupId());
-		if (null != tempQueue){
-			for ( RepositoryEntry<E> currentEntry: tempQueue) {
+		if (this.repository.containsKey(target.getGroupId())){
+			Queue<RepositoryEntry<E>> tempQueue = this.repository.get(target.getGroupId());
+			for (RepositoryEntry<E> currentEntry : tempQueue) {
 				if(currentEntry.getUniqueId().equals(target.getUniqueId())){
 					tempQueue.remove(currentEntry);
 					break; // there should only ever be one
@@ -71,10 +70,9 @@ public class RepositoryManager <E> {
 	}
 
 	public Vector<E> getAll (RepositoryEntry<E> sample){
-		Queue<RepositoryEntry<E>> tempQueue = this.repository.get(sample.getGroupId());
 		Vector<E> results = new Vector<E>();
-		if (null != tempQueue){
-			for ( RepositoryEntry<E> currentEntry: tempQueue) {
+		if (this.repository.containsKey(sample.getGroupId())){
+			for ( RepositoryEntry<E> currentEntry: this.repository.get(sample.getGroupId())) {
 				results.addElement(currentEntry.getData());
 			}
 		}
@@ -83,10 +81,9 @@ public class RepositoryManager <E> {
 	}
 
 	public E get (RepositoryEntry<E> sample){
-		Queue<RepositoryEntry<E>> tempQueue = this.repository.get(sample.getGroupId());
 		E results = null;
-		if (null != tempQueue){
-			for ( RepositoryEntry<E> currentEntry: tempQueue) {
+		if (this.repository.containsKey(sample.getGroupId())){
+			for ( RepositoryEntry<E> currentEntry: this.repository.get(sample.getGroupId())) {
 				if (sample.getUniqueId().equals(currentEntry.getUniqueId())){
 					results = currentEntry.getData();
 					break;
