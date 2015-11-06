@@ -37,4 +37,12 @@ public class GunStats {
 		this.hits++;
 	}
 
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString(){
+		return "Hits: " + this.hits + " Shots: " + this.shots;
+	}
+
 }

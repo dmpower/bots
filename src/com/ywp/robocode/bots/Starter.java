@@ -5,8 +5,11 @@ import java.awt.Graphics2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
+import java.util.Vector;
 
 import com.ywp.robocode.utils.BotTools;
+import com.ywp.robocode.utils.Gun;
+import com.ywp.robocode.utils.HeadOnGun;
 import com.ywp.robocode.utils.MovementWave;
 import com.ywp.robocode.utils.RepositoryManager;
 import com.ywp.robocode.utils.TargetBot;
@@ -29,6 +32,7 @@ public class Starter extends AdvancedRobot {
 	boolean isSweeping;
 
 	ArrayList<MovementWave> moveWaves=new ArrayList<MovementWave>();
+	double enemyEnergy = 0d;
 	TargetBot currentTarget = null;
 	double lastTargetChange = 0d;
 	static final double targetChangeThreshold = 20d;
@@ -37,7 +41,9 @@ public class Starter extends AdvancedRobot {
 	static final double sweepInterval = 100d;
 	RepositoryManager<TargetBot> targetManager;
 
-	double enemyEnergy = 0d;
+	Vector<Gun> gunRack = new Vector<>();
+
+
 
 	/* (non-Javadoc)
 	 * @see robocode.Robot#run()
@@ -50,7 +56,8 @@ public class Starter extends AdvancedRobot {
 
 		this.targetManager = new RepositoryManager<TargetBot>();
 
-		//This is the best possible radar lock
+		this.gunRack.add(new HeadOnGun(this));
+
 		while(true){
 			//			out.println("New turn:" + getTime());
 			doRadar();
@@ -302,7 +309,7 @@ public class Starter extends AdvancedRobot {
 			setTurnRadarRightRadians(Utils.normalRelativeAngle(absBearing-getRadarHeadingRadians())-(Rules.RADAR_TURN_RATE_RADIANS/2));
 		}
 
-		if(Math.abs(getRadarTurnRemainingRadians())< (Math.PI/32)){
+		if(Math.abs(getRadarTurnRemainingRadians())< (Rules.RADAR_TURN_RATE_RADIANS/4)){
 			//			out.println("Radar completed turn");
 			// basically if there is only a little bit of turn remaining, we want to turn
 			// the radar back anyways. Otherwise the radar stops mid turn and we lose most
@@ -321,9 +328,14 @@ public class Starter extends AdvancedRobot {
 		 * Aiming our gun and firing
 		 */
 		if (hasTarget()){
-			double absBearing=this.currentTarget.getBearingRadians()+getHeadingRadians();
-			setTurnGunRightRadians(Utils.normalRelativeAngle(absBearing-getGunHeadingRadians()));
-			setFire(Math.min(2.4,Math.min(this.currentTarget.getEnergy()/4,getEnergy()/10)));
+			this.gunRack.get(0).aimRadians(this.currentTarget);
+			this.gunRack.get(0).fire();
+		}
+		for (Gun gun : this.gunRack) {
+			gun.update();
+			this.out.print(gun.getClass().toString() + ": ");
+			this.out.println(gun.getStats().toString());
 		}
 	}
+
 }

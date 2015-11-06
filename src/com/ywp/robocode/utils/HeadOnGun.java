@@ -11,6 +11,7 @@ import java.util.Vector;
 import robocode.AdvancedRobot;
 import robocode.Bullet;
 import robocode.BulletHitEvent;
+import robocode.Rules;
 import robocode.util.Utils;
 
 /**
@@ -62,18 +63,20 @@ public class HeadOnGun implements Gun {
 	@Override
 	public boolean fire() {
 		boolean results = false;
-		if(this.owningBot.getGunHeat() == 0 && this.owningBot.getGunTurnRemainingRadians()==0){
+		if(this.owningBot.getGunHeat() == 0 && this.owningBot.getGunTurnRemainingRadians() < (Rules.GUN_TURN_RATE_RADIANS/4)){
 			double power = Math.min(2.4,Math.min(this.lastTarget.getEnergy()/4,this.owningBot.getEnergy()/10));
 			Bullet theBullet = this.owningBot.setFireBullet(power);
-			if( ! this.bullets.containsKey(this.lastTarget.getName())){
-				this.bullets.put(this.lastTarget.getName(), new Vector<>());
+			if(null != theBullet){
+				if( ! this.bullets.containsKey(this.lastTarget.getName())){
+					this.bullets.put(this.lastTarget.getName(), new Vector<>());
+				}
+				this.bullets.get(this.lastTarget.getName()).add(theBullet);
+				if( ! this.stats.containsKey(this.lastTarget.getName())){
+					this.stats.put(this.lastTarget.getName(), new GunStats());
+				}
+				this.stats.get(this.lastTarget.getName()).addShot();
+				results = true;
 			}
-			this.bullets.get(this.lastTarget.getName()).add(theBullet);
-			if( ! this.stats.containsKey(this.lastTarget.getName())){
-				this.stats.put(this.lastTarget.getName(), new GunStats());
-			}
-			this.stats.get(this.lastTarget.getName()).addShot();
-			results = true;
 		}
 		return results;
 	}
@@ -83,11 +86,11 @@ public class HeadOnGun implements Gun {
 	 */
 	@Override
 	public void update() {
-		//Vector<Bullet> expired = new Vector<Bullet>();
+		Vector<Bullet> expired = new Vector<Bullet>();
 		for (Entry<String, Vector<Bullet>> target : this.bullets.entrySet()) {
 			for (Bullet bullet : target.getValue()) {
 				if(!bullet.isActive()){
-					//expired.addElement(bullet);
+					expired.addElement(bullet);
 					if(!this.stats.containsKey(target.getKey()))
 					{
 						this.stats.put(target.getKey(), new GunStats());
@@ -96,11 +99,16 @@ public class HeadOnGun implements Gun {
 						// basically if I hit my intended target, add a hit
 						this.stats.get(target.getKey()).addHit();
 					}
-					target.getValue().remove(bullet); // I hope this works correctly
+					this.owningBot.out.println(this.getClass().getName() + " - time: " + this.owningBot.getTime() + " target: " + target.getKey() + " Bullet: " + bullet.toString());
+					//target.getValue().remove(bullet); // this does not work
 				}
 			}
 		}
-		//this.bullets.fremoveAll(expired);
+
+		// I hate doing this second pass, but the loop above will not allow me to delete it at the same time.
+		for (Entry<String, Vector<Bullet>> target : this.bullets.entrySet()) {
+			target.getValue().removeAll(expired);
+		}
 	}
 
 	/* (non-Javadoc)
@@ -109,7 +117,7 @@ public class HeadOnGun implements Gun {
 	@Override
 	public void update(BulletHitEvent event) {
 		// TODO Auto-generated method stub
-
+		// do nothing?
 	}
 
 	/* (non-Javadoc)
