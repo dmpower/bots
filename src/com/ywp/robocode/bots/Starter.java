@@ -48,7 +48,7 @@ public class Starter extends AdvancedRobot {
 		setAdjustRadarForGunTurn(true);
 		setColors(Color.red,Color.yellow,Color.blue);
 
-		this.targetManager = new RepositoryManager<TargetBot>(15);
+		this.targetManager = new RepositoryManager<TargetBot>();
 
 		//This is the best possible radar lock
 		while(true){
@@ -67,6 +67,7 @@ public class Starter extends AdvancedRobot {
 	public void onScannedRobot(ScannedRobotEvent event) {
 		//		out.println("onScannedRobot turn: " + getTime());
 		TargetBot target = new TargetBot(event);
+		this.targetManager.add(target);
 		pickTarget(target);
 		if (this.currentTarget.getName().equals(target.getName())) {
 			double energyChange=(this.enemyEnergy-target.getEnergy());
@@ -134,6 +135,7 @@ public class Starter extends AdvancedRobot {
 		if (this.currentTarget.getName().equals(event.getName())){
 			clearTarget();
 		}
+		this.targetManager.removeAll(new TargetBot(event));
 	}
 
 	/*

@@ -6,6 +6,7 @@ package com.ywp.robocode.utils;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.Vector;
 
@@ -95,5 +96,14 @@ public class RepositoryManager <E> {
 
 		return results;
 
+	}
+
+	public Map<String, Integer> stats(){
+		Map<String, Integer> results = new HashMap<>();
+		for (Entry<String, Queue<RepositoryEntry<E>>> mapEntry: this.repository.entrySet()){
+			results.put(mapEntry.getKey(), mapEntry.getValue().size());
+		}
+
+		return results;
 	}
 }

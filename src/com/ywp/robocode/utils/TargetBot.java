@@ -1,6 +1,7 @@
 package com.ywp.robocode.utils;
 
 import robocode.HitRobotEvent;
+import robocode.RobotDeathEvent;
 import robocode.ScannedRobotEvent;
 
 public class TargetBot implements RepositoryEntry<TargetBot>{
@@ -36,6 +37,17 @@ public class TargetBot implements RepositoryEntry<TargetBot>{
 		this.distance = botWidth;
 		this.velocity = 0d;
 		this.time = event.getTime();
+	}
+
+	public TargetBot(RobotDeathEvent event){
+		this.name = event.getName();
+		this.energy = 0d;
+		this.heading = 0d;
+		this.bearing = 0d;
+		this.distance = 0d;
+		this.velocity = 0d;
+		this.time = event.getTime();
+
 	}
 
 	/**
