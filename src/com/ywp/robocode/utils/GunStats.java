@@ -29,6 +29,10 @@ public class GunStats {
 		return this.hits;
 	}
 
+	public double getAverage() {
+		return (this.shots == 0) ? 0 : ((double)this.hits)/this.shots;
+	}
+
 	public void addShot(){
 		this.shots++;
 	}
@@ -42,7 +46,7 @@ public class GunStats {
 	 */
 	@Override
 	public String toString(){
-		return "Hits: " + this.hits + " Shots: " + this.shots;
+		return "Hits: " + this.hits + " Shots: " + this.shots + " Avg: " + getAverage();
 	}
 
 }

@@ -3,6 +3,8 @@
  */
 package com.ywp.robocode.utils;
 
+import java.io.PrintStream;
+
 import robocode.BulletHitEvent;
 
 /**
@@ -86,4 +88,9 @@ public interface Gun {
 	 */
 	GunStats getStats(TargetBot target);
 
+	/**
+	 * This prints all the stats for this gun to the PrintStream
+	 * @param out - Where to print
+	 */
+	void printAllStats(PrintStream out);
 }

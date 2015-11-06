@@ -3,6 +3,7 @@
  */
 package com.ywp.robocode.utils;
 
+import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -163,4 +164,13 @@ public class HeadOnGun implements Gun {
 		return results;
 	}
 
+	@Override
+	public void printAllStats(PrintStream out){
+		out.println(this.getClass().getName() + " - collected stats");
+		for ( Entry<String, GunStats> curEntry : this.stats.entrySet()) {
+			out.print(curEntry.getKey() + " - ");
+			out.println(curEntry.getValue().toString());
+		}
+		out.println("Total: " + getStats().toString());
+	}
 }

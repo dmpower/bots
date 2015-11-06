@@ -9,16 +9,19 @@ import java.util.Vector;
 
 import com.ywp.robocode.utils.BotTools;
 import com.ywp.robocode.utils.Gun;
+import com.ywp.robocode.utils.GunStats;
 import com.ywp.robocode.utils.HeadOnGun;
 import com.ywp.robocode.utils.MovementWave;
 import com.ywp.robocode.utils.RepositoryManager;
 import com.ywp.robocode.utils.TargetBot;
 
 import robocode.AdvancedRobot;
+import robocode.DeathEvent;
 import robocode.HitRobotEvent;
 import robocode.RobotDeathEvent;
 import robocode.Rules;
 import robocode.ScannedRobotEvent;
+import robocode.WinEvent;
 import robocode.util.Utils;
 
 public class Starter extends AdvancedRobot {
@@ -333,8 +336,29 @@ public class Starter extends AdvancedRobot {
 		}
 		for (Gun gun : this.gunRack) {
 			gun.update();
+			GunStats stats = gun.getStats();
 			this.out.print(gun.getClass().toString() + ": ");
-			this.out.println(gun.getStats().toString());
+			this.out.println(stats.toString());
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see robocode.AdvancedRobot#onDeath(robocode.DeathEvent)
+	 */
+	@Override
+	public void onDeath(DeathEvent event) {
+		for (Gun gun : this.gunRack) {
+			gun.printAllStats(this.out);
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see robocode.Robot#onWin(robocode.WinEvent)
+	 */
+	@Override
+	public void onWin(WinEvent event) {
+		for (Gun gun : this.gunRack) {
+			gun.printAllStats(this.out);
 		}
 	}
 
