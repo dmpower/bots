@@ -29,6 +29,12 @@ public class GunStats {
 		return this.hits;
 	}
 
+	public void addShot(){
+		this.shots++;
+	}
 
+	public void addHit(){
+		this.hits++;
+	}
 
 }
