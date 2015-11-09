@@ -51,6 +51,10 @@ public class RepositoryManager <E> {
 		}
 	}
 
+	public void clear() {
+		this.repository.clear();
+	}
+
 	public void removeGroup(RepositoryEntry<E> sample){
 		removeGroup(sample.getGroupId());
 	}
@@ -62,11 +66,11 @@ public class RepositoryManager <E> {
 		}
 	}
 
-	public void remove(RepositoryEntry<E> target){
-		if (this.repository.containsKey(target.getGroupId())){
-			Queue<RepositoryEntry<E>> tempQueue = this.repository.get(target.getGroupId());
+	public void remove(RepositoryEntry<E> entry){
+		if (this.repository.containsKey(entry.getGroupId())){
+			Queue<RepositoryEntry<E>> tempQueue = this.repository.get(entry.getGroupId());
 			for (RepositoryEntry<E> currentEntry : tempQueue) {
-				if(currentEntry.getUniqueId().equals(target.getUniqueId())){
+				if(currentEntry.getUniqueId().equals(entry.getUniqueId())){
 					tempQueue.remove(currentEntry);
 					break; // there should only ever be one
 				}
@@ -74,11 +78,40 @@ public class RepositoryManager <E> {
 		}
 	}
 
-	public Vector<E> getAll (RepositoryEntry<E> sample){
+	public void remove(Vector<RepositoryEntry<E>> entries){
+		for (RepositoryEntry<E> entry : entries) {
+			if (this.repository.containsKey(entry.getGroupId())){
+				Queue<RepositoryEntry<E>> tempQueue = this.repository.get(entry.getGroupId());
+				for (RepositoryEntry<E> currentEntry : tempQueue) {
+					if(currentEntry.getUniqueId().equals(entry.getUniqueId())){
+						tempQueue.remove(currentEntry);
+						break; // there should only ever be once
+					}
+				}
+			}
+		}
+	}
+
+	public Vector<RepositoryEntry<E>> getAll(RepositoryEntry<E> sample){
 		return getAll(sample.getGroupId());
 	}
 
-	public Vector<E> getAll (String groupId) {
+	public Vector<RepositoryEntry<E>> getAll(String groupId){
+		Vector<RepositoryEntry<E>> results = new Vector<>();
+		if (this.repository.containsKey(groupId)){
+			for ( RepositoryEntry<E> currentEntry: this.repository.get(groupId)) {
+				results.addElement(currentEntry);
+			}
+
+		}
+		return results;
+	}
+
+	public Vector<E> getAllData (RepositoryEntry<E> sample){
+		return getAllData(sample.getGroupId());
+	}
+
+	public Vector<E> getAllData (String groupId) {
 		Vector<E> results = new Vector<E>();
 		if (this.repository.containsKey(groupId)){
 			for ( RepositoryEntry<E> currentEntry: this.repository.get(groupId)) {
