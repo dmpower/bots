@@ -141,7 +141,7 @@ public class Starter extends AdvancedRobot {
 		if (this.currentTarget.getName().equals(event.getName())){
 			clearTarget();
 		}
-		this.targetManager.removeAll(new TargetBot(event));
+		this.targetManager.removeGroup(new TargetBot(event));
 	}
 
 	/*

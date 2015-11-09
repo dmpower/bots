@@ -51,9 +51,14 @@ public class RepositoryManager <E> {
 		}
 	}
 
-	public void removeAll(RepositoryEntry<E> sample){
-		if (this.repository.containsKey(sample.getGroupId())){
-			this.repository.get(sample.getGroupId()).clear();
+	public void removeGroup(RepositoryEntry<E> sample){
+		removeGroup(sample.getGroupId());
+	}
+
+	public void removeGroup(String groupId){
+		if (this.repository.containsKey(groupId)){
+			this.repository.get(groupId).clear();
+			this.repository.remove(groupId);
 		}
 	}
 
