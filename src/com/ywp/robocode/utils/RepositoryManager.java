@@ -70,9 +70,13 @@ public class RepositoryManager <E> {
 	}
 
 	public Vector<E> getAll (RepositoryEntry<E> sample){
+		return getAll(sample.getGroupId());
+	}
+
+	public Vector<E> getAll (String groupId) {
 		Vector<E> results = new Vector<E>();
-		if (this.repository.containsKey(sample.getGroupId())){
-			for ( RepositoryEntry<E> currentEntry: this.repository.get(sample.getGroupId())) {
+		if (this.repository.containsKey(groupId)){
+			for ( RepositoryEntry<E> currentEntry: this.repository.get(groupId)) {
 				results.addElement(currentEntry.getData());
 			}
 		}
