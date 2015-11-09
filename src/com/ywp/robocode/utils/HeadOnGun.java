@@ -180,6 +180,6 @@ public class HeadOnGun implements Gun {
 	 */
 	@Override
 	public void onPaint(Graphics2D g){
-
+		// really nothing to paint for a head on gun I could make rays out of the bullets?
 	}
 }
