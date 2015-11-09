@@ -33,7 +33,6 @@ public class Starter extends AdvancedRobot {
 	final static boolean PAINT_GUN=false;
 
 	ArrayList<MovementWave> moveWaves=new ArrayList<MovementWave>();
-	double enemyEnergy = 0d;
 	TargetBot currentTarget = null;
 	double lastTargetChange = 0d;
 	static final double targetChangeThreshold = 20d;
@@ -80,13 +79,12 @@ public class Starter extends AdvancedRobot {
 		TargetBot target = new TargetBot(event);
 		this.targetManager.add(target);
 		pickTarget(target);
-		if (this.currentTarget.getName().equals(target.getName())) {
-			double energyChange=(this.enemyEnergy-target.getEnergy());
+		Vector<TargetBot> targetData = this.targetManager.getAllData(this.currentTarget);
+		if (targetData.get(0).getTime() == targetData.get(1).getBearing()+1) {
+			double energyChange = targetData.get(1).getEnergy()-targetData.get(0).getEnergy();
 			if(energyChange<=3&&energyChange>=0.1){
 				logMovementWave(target,energyChange);
 			}
-
-			updateTarget(target);
 		}
 	}
 
@@ -277,7 +275,6 @@ public class Starter extends AdvancedRobot {
 	 */
 	private void updateTarget (TargetBot target) {
 		this.currentTarget = target;
-		this.enemyEnergy = target.getEnergy();
 	}
 
 	/**
@@ -285,7 +282,6 @@ public class Starter extends AdvancedRobot {
 	 */
 	private void clearTarget(){
 		this.currentTarget = null;
-		this.enemyEnergy = 0d;
 	}
 
 	private boolean hasTarget(){
