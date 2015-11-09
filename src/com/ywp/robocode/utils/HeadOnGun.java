@@ -44,7 +44,7 @@ public class HeadOnGun implements Gun {
 	 */
 	@Override
 	public double aimRadians(TargetBot target) {
-		this.lastTarget = target;
+		feedTarget(target);
 		double absBearing=this.lastTarget.getBearingRadians()+this.owningBot.getHeadingRadians();
 		double targetAngle = Utils.normalRelativeAngle(absBearing-this.owningBot.getGunHeadingRadians());
 		this.owningBot.setTurnGunRightRadians(targetAngle);
