@@ -32,16 +32,17 @@ public class Starter extends AdvancedRobot {
 	final static boolean PAINT_MOVEMENT=true;
 	final static boolean PAINT_GUN=false;
 
-	boolean isSweeping;
-
 	ArrayList<MovementWave> moveWaves=new ArrayList<MovementWave>();
 	double enemyEnergy = 0d;
 	TargetBot currentTarget = null;
 	double lastTargetChange = 0d;
 	static final double targetChangeThreshold = 20d;
 
+	boolean isSweeping;
 	double sweepTime = 0d;
-	static final double sweepInterval = 100d;
+	static final double SWEEP_INTERVAL = 100d;
+	static final double RADAR_HALF_SWEEP = Rules.RADAR_TURN_RATE_RADIANS/2;
+	static final double RADAR_TOLLARENCE = RADAR_HALF_SWEEP/2;
 	RepositoryManager<TargetBot> targetManager;
 
 	Vector<Gun> gunRack = new Vector<>();
@@ -116,17 +117,12 @@ public class Starter extends AdvancedRobot {
 				g.fillOval((int)(latBullet.x-radius),(int)latBullet.y-3,(int)(radius*2),(int)(radius*2));
 			}
 		}
-		/*
-		 * Just paints the waves for the targeting.
-		 */
-		//		if(PAINT_GUN){
-		//			for(int i=0;i<gunWaves.size();i++){
-		//				GunWave w=gunWaves.get(i);
-		//				g.setColor(Color.blue);
-		//				radius=(getTime()-w.startTime)*w.speed;
-		//				g.drawOval((int)(w.origin.x-radius),(int)(w.origin.y-radius),(int)radius*2,(int)radius*2);
-		//			}
-		//		}
+
+		if(PAINT_GUN){
+			for (Gun gun : this.gunRack) {
+				gun.onPaint(g);
+			}
+		}
 
 		if (hasTarget()){
 			Point2D.Double selfPoint = BotTools.convertToPoint(this);
@@ -234,7 +230,7 @@ public class Starter extends AdvancedRobot {
 	@Override
 	public void onHitRobot(HitRobotEvent event) {
 		// target who hit us
-		setTarget(new TargetBot(event));
+		setTarget(new TargetBot(event, getWidth()));
 	}
 
 	/**
@@ -299,7 +295,7 @@ public class Starter extends AdvancedRobot {
 	private void doRadar(){
 		double currentTime = getTime();
 		//		out.println("Rader turn: " + currentTime + " remaining turn: " + getRadarTurnRemainingRadians());
-		if (getOthers() > 1 && (this.sweepTime == 0 || this.sweepTime+sweepInterval < currentTime)){
+		if (getOthers() > 1 && (this.sweepTime == 0 || this.sweepTime+SWEEP_INTERVAL < currentTime)){
 			//			out.println("Radar sweeping");
 			this.isSweeping = true;
 			this.sweepTime = currentTime+1;
@@ -309,17 +305,17 @@ public class Starter extends AdvancedRobot {
 		if(!this.isSweeping && hasTarget() && this.currentTarget.getTime() == currentTime){
 			//			out.println("Radar scanned bot, turn back");
 			double absBearing=this.currentTarget.getBearingRadians()+getHeadingRadians();
-			setTurnRadarRightRadians(Utils.normalRelativeAngle(absBearing-getRadarHeadingRadians())-(Rules.RADAR_TURN_RATE_RADIANS/2));
+			setTurnRadarRightRadians(Utils.normalRelativeAngle(absBearing-getRadarHeadingRadians())-(RADAR_HALF_SWEEP));
 		}
 
-		if(Math.abs(getRadarTurnRemainingRadians())< (Rules.RADAR_TURN_RATE_RADIANS/4)){
+		if(Math.abs(getRadarTurnRemainingRadians())< (RADAR_TOLLARENCE)){
 			//			out.println("Radar completed turn");
 			// basically if there is only a little bit of turn remaining, we want to turn
 			// the radar back anyways. Otherwise the radar stops mid turn and we lose most
 			// of the radar's time sitting still.
 
-			// note: we use POSITIVE_INFINITY instead of Rules.RADAR_TURN_RATE_RADIANS/2
-			// because if there is a slip we will keep turning until we find a robot.
+			// note: we use POSITIVE_INFINITY instead of RADAR_HALF_SWEEP because
+			// if there is a slip we will keep turning until we find another robot.
 			setTurnRadarRightRadians(Double.POSITIVE_INFINITY);
 			this.isSweeping = false;
 		}

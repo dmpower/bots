@@ -3,6 +3,7 @@
  */
 package com.ywp.robocode.utils;
 
+import java.awt.Graphics2D;
 import java.io.PrintStream;
 
 import robocode.BulletHitEvent;
@@ -87,6 +88,13 @@ public interface Gun {
 	 * @return returns the shot and hits against the target
 	 */
 	GunStats getStats(TargetBot target);
+
+	/**
+	 * Give this gun a chance to do some painting.
+	 *
+	 * @param g - graphics object to paint with.
+	 */
+	void onPaint(Graphics2D g);
 
 	/**
 	 * This prints all the stats for this gun to the PrintStream

@@ -3,6 +3,7 @@
  */
 package com.ywp.robocode.utils;
 
+import java.awt.Graphics2D;
 import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Map;
@@ -172,5 +173,13 @@ public class HeadOnGun implements Gun {
 			out.println(curEntry.getValue().toString());
 		}
 		out.println("Total: " + getStats().toString());
+	}
+
+	/* (non-Javadoc)
+	 * @see com.ywp.robocode.utils.Gun#onPaint(java.awt.Graphics2D)
+	 */
+	@Override
+	public void onPaint(Graphics2D g){
+
 	}
 }

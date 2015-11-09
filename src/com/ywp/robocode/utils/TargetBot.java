@@ -23,12 +23,7 @@ public class TargetBot implements RepositoryEntry<TargetBot>{
 		this.time = event.getTime();
 	}
 
-	public TargetBot(HitRobotEvent event){
-		// 36 came from Robot.WIDTH but it is a private final variable accessed by getWidth().
-		this(event,36);
-	}
-
-	public TargetBot(HitRobotEvent event, int botWidth){
+	public TargetBot(HitRobotEvent event, double botWidth){
 		this.name = event.getName();
 		this.energy = event.getEnergy();
 		this.heading = 0d;
