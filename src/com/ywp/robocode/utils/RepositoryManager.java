@@ -8,6 +8,7 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Queue;
+import java.util.Set;
 import java.util.Vector;
 
 /**
@@ -135,6 +136,15 @@ public class RepositoryManager <E> {
 
 		return results;
 
+	}
+
+	/**
+	 * Get all the current group id being tracked
+	 *
+	 * @return - a set containing the group IDs
+	 */
+	public Set<String> getAllGroupIds() {
+		return this.repository.keySet();
 	}
 
 	public Map<String, Integer> stats(){
