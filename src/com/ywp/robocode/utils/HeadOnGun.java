@@ -127,7 +127,7 @@ public class HeadOnGun implements Gun {
 	@Override
 	public boolean isValid(TargetBot target) {
 		// this gun is always valid
-		return true;
+		return isActive();
 	}
 
 	/* (non-Javadoc)
