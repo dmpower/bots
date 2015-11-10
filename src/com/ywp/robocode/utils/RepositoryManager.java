@@ -12,20 +12,31 @@ import java.util.Set;
 import java.util.Vector;
 
 /**
+ * This is a data manager that keeps entries together by groups. Each group will have a
+ * max number of entries determined by the threshold. When threshold+1 is added, the oldest
+ * entry is removed.
+ *
  * @author dpower
  *
  */
 public class RepositoryManager <E> {
 
-	private int threshHold;
+	private final int threshold;
 	private Map<String, Queue<RepositoryEntry<E>>> repository = new HashMap<String, Queue<RepositoryEntry <E>>>();
 
+	/**
+	 * Default constructor
+	 */
 	public RepositoryManager() {
 		this(5);
 	}
 
-	public RepositoryManager(int threshHold){
-		this.threshHold = threshHold;
+	/**
+	 * The constructor that allow one to control the number of entries per group
+	 * @param threshold - max entries per group
+	 */
+	public RepositoryManager(int threshold){
+		this.threshold = threshold;
 	}
 
 	public void add(RepositoryEntry <E> newEntry){
@@ -45,7 +56,7 @@ public class RepositoryManager <E> {
 		if (!isPresent){
 			Queue<RepositoryEntry<E>> tempQueue = this.repository.get(newEntry.getGroupId());
 			tempQueue.offer(newEntry);
-			if ( this.threshHold < tempQueue.size()){
+			if ( this.threshold < tempQueue.size()){
 				tempQueue.remove();
 			}
 
