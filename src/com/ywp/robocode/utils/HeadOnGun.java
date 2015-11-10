@@ -13,7 +13,6 @@ import java.util.Vector;
 import robocode.AdvancedRobot;
 import robocode.Bullet;
 import robocode.BulletHitEvent;
-import robocode.Rules;
 import robocode.util.Utils;
 
 /**
@@ -65,7 +64,7 @@ public class HeadOnGun implements Gun {
 	@Override
 	public boolean fire() {
 		boolean results = false;
-		if(this.owningBot.getGunHeat() == 0 && this.owningBot.getGunTurnRemainingRadians() < (Rules.GUN_TURN_RATE_RADIANS/4)){
+		if(this.owningBot.getGunHeat() == 0 && this.owningBot.getGunTurnRemainingRadians() < (GUN_TURN_THRESHOLD)){
 			double power = Math.min(2.4,Math.min(this.lastTarget.getEnergy()/4,this.owningBot.getEnergy()/10));
 			Bullet theBullet = this.owningBot.setFireBullet(power);
 			if(null != theBullet){
