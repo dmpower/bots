@@ -7,6 +7,7 @@ import java.awt.Graphics2D;
 import java.io.PrintStream;
 
 import robocode.BulletHitEvent;
+import robocode.Rules;
 
 /**
  * This is a general interface for Gun implementations
@@ -14,6 +15,8 @@ import robocode.BulletHitEvent;
  *
  */
 public interface Gun {
+
+	static final double GUN_TURN_THRESHOLD = Rules.GUN_TURN_RATE_RADIANS/4;
 
 	/**
 	 * This provides target data to the gun but does not ask it to aim.
