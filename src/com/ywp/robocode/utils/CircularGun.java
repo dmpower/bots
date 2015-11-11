@@ -57,7 +57,11 @@ public class CircularGun implements Gun {
 	public double aimRadians(TargetBot target) {
 		// TODO Auto-generated method stub
 		feedTarget(target);
-		double botHalfSize = owningBot.getWidth()/2;
+		double botSize = owningBot.getWidth();
+		double botHalfSize = botSize/2;
+		Rectangle2D.Double battleField =
+				new Rectangle2D.Double(botHalfSize, botHalfSize,
+						owningBot.getBattleFieldWidth()-botSize, owningBot.getBattleFieldHeight()-botSize);
 		double bulletPower = getPower(target);
 		double bulletSpeed = Rules.getBulletSpeed(bulletPower);
 		Vector<TargetBot> targetData = this.targetRepository.getAllData(target);
@@ -69,7 +73,6 @@ public class CircularGun implements Gun {
 		double absBearing=targetEntry1.getBearingRadians()+this.owningBot.getHeadingRadians();
 		Point origin = BotTools.convertToPoint(this.owningBot);
 		Point predictedPosition = BotTools.project(origin, targetEntry1.getDistance(), absBearing);
-		Rectangle2D.Double battleField = getBattleField();
 		double timeDelta = 0;
 		while ( (++timeDelta) * bulletSpeed < origin.distance(predictedPosition) ){
 			predictedPosition = BotTools.project(predictedPosition, speed, predictedHeading);
@@ -81,7 +84,9 @@ public class CircularGun implements Gun {
 			}
 		}
 
-		return 0;
+		double firingAdjustment = Utils.normalAbsoluteAngle(origin.angleRadians(predictedPosition)-owningBot.getGunHeadingRadians());
+		owningBot.setTurnGunRight(firingAdjustment);
+		return firingAdjustment;
 	}
 
 	/* (non-Javadoc)
@@ -230,17 +235,6 @@ public class CircularGun implements Gun {
 
 	private double getPower(TargetBot target) {
 		return Math.min(2.4,Math.min(target.getEnergy()/4,this.owningBot.getEnergy()/10));
-	}
-
-	public Rectangle2D.Double getBattleField()
-	{
-		if(null == _battleField)
-		{
-			double botSize = owningBot.getWidth();
-			_battleField = new Rectangle2D.Double(botSize/2, botSize/2, owningBot.getBattleFieldWidth()-botSize, owningBot.getBattleFieldHeight()-botSize);
-		}
-
-		return _battleField ;
 	}
 
 }
