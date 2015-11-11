@@ -7,9 +7,9 @@ import java.util.ArrayList;
 import java.util.Vector;
 
 import com.ywp.robocode.utils.BotTools;
+import com.ywp.robocode.utils.CircularGun;
 import com.ywp.robocode.utils.Gun;
 import com.ywp.robocode.utils.GunStats;
-import com.ywp.robocode.utils.HeadOnGun;
 import com.ywp.robocode.utils.MovementWave;
 import com.ywp.robocode.utils.Point;
 import com.ywp.robocode.utils.RepositoryManager;
@@ -33,7 +33,7 @@ public class Starter extends AdvancedRobot {
 	final static boolean PAINT_GUN=false;
 
 	ArrayList<MovementWave> moveWaves=new ArrayList<MovementWave>();
-	TargetBot currentTarget = null;
+	String currentTarget = null;
 	double lastTargetChange = 0d;
 	static final double targetChangeThreshold = 20d;
 
@@ -62,8 +62,8 @@ public class Starter extends AdvancedRobot {
 
 		this.targetManager = new RepositoryManager<TargetBot>();
 
-		this.gunRack.add(new HeadOnGun(this));
-		//this.gunRack.add(new CircularGun(targetManager, this));
+		//this.gunRack.add(new HeadOnGun(this));
+		this.gunRack.add(new CircularGun(targetManager, this));
 
 		while(true){
 			//			out.println("New turn:" + getTime());
@@ -80,12 +80,12 @@ public class Starter extends AdvancedRobot {
 	 */
 	@Override
 	public void onScannedRobot(ScannedRobotEvent event) {
-		//		out.println("onScannedRobot turn: " + getTime());
+		out.println("onScannedRobot turn: " + getTime());
 		TargetBot target = new TargetBot(event);
 		this.targetManager.add(target);
 		pickTarget(target);
-		Vector<TargetBot> targetData = this.targetManager.getAllData(this.currentTarget);
-		if (targetData.get(0).getTime() == targetData.get(1).getTime()+1) {
+		Vector<TargetBot> targetData = this.targetManager.getAllData(this.currentTarget());
+		if (targetData.size() > 1 && targetData.get(0).getTime() == targetData.get(1).getTime()+1) {
 			double energyChange = targetData.get(1).getEnergy()-targetData.get(0).getEnergy();
 			if(energyChange<=3&&energyChange>=0.1){
 				logMovementWave(target,energyChange);
@@ -129,8 +129,8 @@ public class Starter extends AdvancedRobot {
 
 		if (hasTarget()){
 			Point selfPoint = BotTools.convertToPoint(this);
-			double absBearing=this.currentTarget.getBearingRadians()+getHeadingRadians();
-			Point targetPoint = BotTools.project(selfPoint, this.currentTarget.getDistance()+getBattleFieldWidth()*2, absBearing);
+			double absBearing=this.currentTarget().getBearingRadians()+getHeadingRadians();
+			Point targetPoint = BotTools.project(selfPoint, this.currentTarget().getDistance()+getBattleFieldWidth()*2, absBearing);
 			g.setColor(Color.yellow);
 			g.drawLine((int)targetPoint.getX(), (int)targetPoint.getY(), (int)getX(), (int)getY());
 		}
@@ -141,7 +141,7 @@ public class Starter extends AdvancedRobot {
 	 */
 	@Override
 	public void onRobotDeath(RobotDeathEvent event) {
-		if (this.currentTarget.getName().equals(event.getName())){
+		if (this.currentTarget().getName().equals(event.getName())){
 			clearTarget();
 		}
 		this.targetManager.removeGroup(new TargetBot(event));
@@ -178,7 +178,7 @@ public class Starter extends AdvancedRobot {
 	 */
 	private void doMove(){
 		if(hasTarget()){
-			Point enemyLocation = BotTools.convertToPoint(this, this.currentTarget);
+			Point enemyLocation = BotTools.convertToPoint(this, this.currentTarget());
 			MovementWave w;
 			//This for loop rates each angle individually
 			double bestRating=Double.POSITIVE_INFINITY;
@@ -246,11 +246,11 @@ public class Starter extends AdvancedRobot {
 		}
 
 		if ((this.lastTargetChange + targetChangeThreshold) < getTime()) {
-			//			out.println("Time to change target.");
-			if (! this.currentTarget.getName().equals(target.getName())) {
-				//				out.println("  New Target Found");
-				if (target.getDistance() < this.currentTarget.getDistance()) {
-					//					out.println("    New Target is closer");
+			out.println("Time to change target.");
+			if (! this.currentTarget().getName().equals(target.getName())) {
+				out.println("  New Target Found");
+				if (target.getDistance() < this.currentTarget().getDistance()) {
+					out.println("    New Target is closer");
 					setTarget(target);
 				}
 
@@ -268,18 +268,8 @@ public class Starter extends AdvancedRobot {
 	 * @param target - the new target
 	 */
 	private void setTarget (TargetBot target) {
-		updateTarget(target);
+		out.println("Turn: " + getTime() + " selected " + target.getName() + " for new target.");
 		this.lastTargetChange = getTime();
-	}
-
-	/**
-	 * This is use to refresh the target's information. It is assumed this is not
-	 * changing the target. For changing the target see setTarget()
-	 *
-	 * @param target - updated information for target
-	 */
-	private void updateTarget (TargetBot target) {
-		this.currentTarget = target;
 	}
 
 	/**
@@ -294,23 +284,23 @@ public class Starter extends AdvancedRobot {
 	}
 
 	private void doRadar(){
-		double currentTime = getTime();
-		//		out.println("Rader turn: " + currentTime + " remaining turn: " + getRadarTurnRemainingRadians());
+		long currentTime = getTime();
+		out.println("Rader turn: " + currentTime + " remaining turn: " + getRadarTurnRemainingRadians());
 		if (getOthers() > 1 && (this.sweepTime == 0 || this.sweepTime+SWEEP_INTERVAL < currentTime)){
-			//			out.println("Radar sweeping");
+			out.println("Radar sweeping");
 			this.isSweeping = true;
 			this.sweepTime = currentTime+1;
 			setTurnRadarRightRadians(Math.PI*2); // full circle
 		}
 
-		if(!this.isSweeping && hasTarget() && this.currentTarget.getTime() == currentTime){
-			//			out.println("Radar scanned bot, turn back");
-			double absBearing=this.currentTarget.getBearingRadians()+getHeadingRadians();
+		if(!this.isSweeping && hasTarget() && this.currentTarget().getTime() == currentTime){
+			out.println("Radar scanned bot, turn back");
+			double absBearing=this.currentTarget().getBearingRadians()+getHeadingRadians();
 			setTurnRadarRightRadians(Utils.normalRelativeAngle(absBearing-getRadarHeadingRadians())-(RADAR_HALF_SWEEP));
 		}
 
 		if(Math.abs(getRadarTurnRemainingRadians())< (RADAR_TOLLARENCE)){
-			//			out.println("Radar completed turn");
+			out.println("Radar completed turn");
 			// basically if there is only a little bit of turn remaining, we want to turn
 			// the radar back anyways. Otherwise the radar stops mid turn and we lose most
 			// of the radar's time sitting still.
@@ -328,8 +318,15 @@ public class Starter extends AdvancedRobot {
 		 * Aiming our gun and firing
 		 */
 		if (hasTarget()){
-			this.gunRack.get(0).aimRadians(this.currentTarget);
-			this.gunRack.get(0).fire();
+			try {
+				if(this.gunRack.get(0).isValid(currentTarget())) {
+					this.gunRack.get(0).aimRadians(this.currentTarget());
+					this.gunRack.get(0).fire();
+				}
+			} catch (Exception e) {
+				// log and eat it
+				out.println(e.getMessage());
+			}
 		}
 		for (Gun gun : this.gunRack) {
 			gun.update();
@@ -371,5 +368,10 @@ public class Starter extends AdvancedRobot {
 			this.endTurn = false;
 		}
 		return this.time;
+	}
+
+	private TargetBot currentTarget() {
+		Vector<TargetBot> targetData = targetManager.getAllData(this.currentTarget);
+		return targetData.get(0);
 	}
 }

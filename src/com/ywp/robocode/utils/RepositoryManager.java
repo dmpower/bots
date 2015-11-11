@@ -55,10 +55,12 @@ public class RepositoryManager <E> {
 
 		if (!isPresent){
 			Queue<RepositoryEntry<E>> tempQueue = this.repository.get(newEntry.getGroupId());
-			tempQueue.offer(newEntry);
+			boolean results = tempQueue.offer(newEntry);
+			System.out.println(this.getClass().getName() + " : adding " + (results?"Suceeded":"Failed") + ".");
 			if ( this.threshold < tempQueue.size()){
 				tempQueue.remove();
 			}
+			this.repository.put(newEntry.getGroupId(), tempQueue); // I guess you have to remember to update
 
 		}
 	}

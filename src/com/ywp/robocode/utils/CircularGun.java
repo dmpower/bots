@@ -55,7 +55,9 @@ public class CircularGun implements Gun {
 	 */
 	@Override
 	public double aimRadians(TargetBot target) {
-		// TODO Auto-generated method stub
+		if (! isValid(target)) {
+			throw new IllegalStateException("Cannot aim an invalid gun. Please call isValid first.");
+		}
 		feedTarget(target);
 		double botSize = owningBot.getWidth();
 		double botHalfSize = botSize/2;
@@ -158,7 +160,10 @@ public class CircularGun implements Gun {
 		boolean results = isActive();
 		if(results) {
 			Vector<TargetBot> targetData = this.targetRepository.getAllData(target);
-			results = (targetData.get(0).getTime()-targetData.get(1).getTime()) == 1;
+			results = targetData.size() > 1;
+			if(results) {
+				results = (targetData.get(0).getTime()-targetData.get(1).getTime()) == 1;
+			}
 			if(results) {
 				results = (targetData.get(1).getTime()-targetData.get(2).getTime()) == 1;
 			}
