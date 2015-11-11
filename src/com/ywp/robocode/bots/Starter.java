@@ -84,7 +84,7 @@ public class Starter extends AdvancedRobot {
 		this.targetManager.add(target);
 		pickTarget(target);
 		Vector<TargetBot> targetData = this.targetManager.getAllData(this.currentTarget);
-		if (targetData.get(0).getTime() == targetData.get(1).getBearing()+1) {
+		if (targetData.get(0).getTime() == targetData.get(1).getTime()+1) {
 			double energyChange = targetData.get(1).getEnergy()-targetData.get(0).getEnergy();
 			if(energyChange<=3&&energyChange>=0.1){
 				logMovementWave(target,energyChange);
