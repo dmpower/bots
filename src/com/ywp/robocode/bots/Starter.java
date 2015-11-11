@@ -45,6 +45,8 @@ public class Starter extends AdvancedRobot {
 	RepositoryManager<TargetBot> targetManager;
 
 	Vector<Gun> gunRack = new Vector<>();
+	private boolean endTurn = true;
+	private long time;
 
 
 
@@ -60,12 +62,14 @@ public class Starter extends AdvancedRobot {
 		this.targetManager = new RepositoryManager<TargetBot>();
 
 		this.gunRack.add(new HeadOnGun(this));
+		//this.gunRack.add(new CircularGun(targetManager, this));
 
 		while(true){
 			//			out.println("New turn:" + getTime());
 			doRadar();
 			doGun();
 			doMove();
+			this.endTurn = true;
 			execute();
 		}
 	}
@@ -352,6 +356,20 @@ public class Starter extends AdvancedRobot {
 		for (Gun gun : this.gunRack) {
 			gun.printAllStats(this.out);
 		}
+	}
+
+	/* (non-Javadoc)
+	 * @see robocode.Robot#getTime()
+	 */
+	@Override
+	public long getTime() {
+		// This is an important override. GetTime is the most used call and we have a set number of calls
+		// per turn. This will close to halve the number of calls.
+		if(this.endTurn) {
+			this.time = super.getTime();
+			this.endTurn = false;
+		}
+		return this.time;
 	}
 
 }
