@@ -12,7 +12,7 @@ import robocode.util.Utils;
  * <p/>
  * Circular movement, Circular targeting.... Everything is circles.
  *
- * 		            S                            S
+ *                  S                            S
  *              R       P                    R       P
  *             E         I                  E         I
  *            P     O     N                P     O     N

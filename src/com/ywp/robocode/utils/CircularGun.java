@@ -4,7 +4,7 @@
 package com.ywp.robocode.utils;
 
 import java.awt.Graphics2D;
-import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Map;
@@ -29,6 +29,8 @@ public class CircularGun implements Gun {
 	private AdvancedRobot owningBot;
 	private RepositoryManager<BulletData> bullets = new RepositoryManager<>();
 	private Map<String,GunStats> stats = new HashMap<>();
+
+	private static Rectangle2D.Double _battleField = null;
 
 	/**
 	 * @param targetRepository
@@ -55,17 +57,30 @@ public class CircularGun implements Gun {
 	public double aimRadians(TargetBot target) {
 		// TODO Auto-generated method stub
 		feedTarget(target);
+		double botHalfSize = owningBot.getWidth()/2;
 		double bulletPower = getPower(target);
 		double bulletSpeed = Rules.getBulletSpeed(bulletPower);
 		Vector<TargetBot> targetData = this.targetRepository.getAllData(target);
 		TargetBot targetEntry1 = targetData.get(0);
 		TargetBot targetEntry2 = targetData.get(1);
-		double turnRate = targetEntry2.getHeadingRadians() - targetEntry1.getHeadingRadians();
+		double turnRate = targetEntry1.getHeadingRadians() - targetEntry2.getHeadingRadians();
 		double speed = targetEntry1.getVelocity();
 		double predictedHeading = targetEntry1.getHeadingRadians();
 		double absBearing=targetEntry1.getBearingRadians()+this.owningBot.getHeadingRadians();
-		Point2D.Double origin = BotTools.convertToPoint(this.owningBot);
-		Point2D.Double pridictedPosition = BotTools.project(origin, targetEntry1.getDistance(), absBearing);
+		Point origin = BotTools.convertToPoint(this.owningBot);
+		Point predictedPosition = BotTools.project(origin, targetEntry1.getDistance(), absBearing);
+		Rectangle2D.Double battleField = getBattleField();
+		double timeDelta = 0;
+		while ( (++timeDelta) * bulletSpeed < origin.distance(predictedPosition) ){
+			predictedPosition = BotTools.project(predictedPosition, speed, predictedHeading);
+			predictedHeading += turnRate;
+			if (! battleField.contains(predictedPosition)) {
+				predictedPosition.x = Math.min(botHalfSize, Math.max(owningBot.getBattleFieldWidth()-botHalfSize, predictedPosition.getX()));
+				predictedPosition.y = Math.min(botHalfSize, Math.max(owningBot.getBattleFieldHeight()-botHalfSize, predictedPosition.getY()));
+				break; // hit wall we are done
+			}
+		}
+
 		return 0;
 	}
 
@@ -215,6 +230,17 @@ public class CircularGun implements Gun {
 
 	private double getPower(TargetBot target) {
 		return Math.min(2.4,Math.min(target.getEnergy()/4,this.owningBot.getEnergy()/10));
+	}
+
+	public Rectangle2D.Double getBattleField()
+	{
+		if(null == _battleField)
+		{
+			double botSize = owningBot.getWidth();
+			_battleField = new Rectangle2D.Double(botSize/2, botSize/2, owningBot.getBattleFieldWidth()-botSize, owningBot.getBattleFieldHeight()-botSize);
+		}
+
+		return _battleField ;
 	}
 
 }

@@ -2,7 +2,6 @@ package com.ywp.robocode.bots;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Vector;
@@ -12,6 +11,7 @@ import com.ywp.robocode.utils.Gun;
 import com.ywp.robocode.utils.GunStats;
 import com.ywp.robocode.utils.HeadOnGun;
 import com.ywp.robocode.utils.MovementWave;
+import com.ywp.robocode.utils.Point;
 import com.ywp.robocode.utils.RepositoryManager;
 import com.ywp.robocode.utils.TargetBot;
 
@@ -47,6 +47,7 @@ public class Starter extends AdvancedRobot {
 	Vector<Gun> gunRack = new Vector<>();
 	private boolean endTurn = true;
 	private long time;
+	private static Rectangle2D.Double battleField = null;
 
 
 
@@ -108,8 +109,8 @@ public class Starter extends AdvancedRobot {
 				MovementWave w=this.moveWaves.get(i);
 				g.setColor(Color.blue);
 				radius=(getTime()-w.startTime)*w.speed+w.speed;
-				Point2D.Double hotBullet=BotTools.project(w.origin,radius,w.angle);
-				Point2D.Double latBullet=BotTools.project(w.origin,radius,w.angle+w.latVel);
+				Point hotBullet=BotTools.project(w.origin,radius,w.angle);
+				Point latBullet=BotTools.project(w.origin,radius,w.angle+w.latVel);
 				g.setColor(Color.red);
 				double sArc = Math.toDegrees(w.angle);
 				double eArc = Math.toDegrees(w.latVel);
@@ -127,9 +128,9 @@ public class Starter extends AdvancedRobot {
 		}
 
 		if (hasTarget()){
-			Point2D.Double selfPoint = BotTools.convertToPoint(this);
+			Point selfPoint = BotTools.convertToPoint(this);
 			double absBearing=this.currentTarget.getBearingRadians()+getHeadingRadians();
-			Point2D.Double targetPoint = BotTools.project(selfPoint, this.currentTarget.getDistance()+getBattleFieldWidth()*2, absBearing);
+			Point targetPoint = BotTools.project(selfPoint, this.currentTarget.getDistance()+getBattleFieldWidth()*2, absBearing);
 			g.setColor(Color.yellow);
 			g.drawLine((int)targetPoint.getX(), (int)targetPoint.getY(), (int)getX(), (int)getY());
 		}
@@ -155,7 +156,7 @@ public class Starter extends AdvancedRobot {
 		double absBearing=e.getBearingRadians()+getHeadingRadians();
 		MovementWave w=new MovementWave();
 		//This is the spot that the enemy was in when they fired.
-		w.origin=BotTools.project(new Point2D.Double(getX(),getY()),e.getDistance(),absBearing);
+		w.origin=BotTools.project(new Point(getX(),getY()),e.getDistance(),absBearing);
 		//20-3*bulletPower is the formula to find a bullet's speed.
 		w.speed=20-3*energyChange;
 		//The time at which the bullet was fired.
@@ -177,7 +178,7 @@ public class Starter extends AdvancedRobot {
 	 */
 	private void doMove(){
 		if(hasTarget()){
-			Point2D.Double enemyLocation = BotTools.convertToPoint(this, this.currentTarget);
+			Point enemyLocation = BotTools.convertToPoint(this, this.currentTarget);
 			MovementWave w;
 			//This for loop rates each angle individually
 			double bestRating=Double.POSITIVE_INFINITY;
@@ -185,7 +186,7 @@ public class Starter extends AdvancedRobot {
 				double rating=0;
 
 				//Movepoint is position we would be at if we were to move one robot-length in the given direction.
-				Point2D.Double movePoint=BotTools.project(new Point2D.Double(getX(),getY()),36,moveAngle);
+				Point movePoint=BotTools.project(new Point(getX(),getY()),36,moveAngle);
 
 				/*
 				 * This loop will iterate through each wave and add a risk for the simulated bullets on each one
@@ -195,7 +196,7 @@ public class Starter extends AdvancedRobot {
 					w=this.moveWaves.get(i);
 
 					//This part will remove waves that have passed our robot, so we no longer keep taking into account old ones
-					if(new Point2D.Double(getX(),getY()).distance(w.origin)<(getTime()-w.startTime)*w.speed+w.speed){
+					if(new Point(getX(),getY()).distance(w.origin)<(getTime()-w.startTime)*w.speed+w.speed){
 						this.moveWaves.remove(w);
 					}
 					else{
@@ -371,5 +372,4 @@ public class Starter extends AdvancedRobot {
 		}
 		return this.time;
 	}
-
 }

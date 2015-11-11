@@ -1,8 +1,5 @@
 package com.ywp.robocode.utils;
 
-import java.awt.geom.Point2D;
-import java.awt.geom.Point2D.Double;
-
 import robocode.Bullet;
 
 public class BulletData implements RepositoryEntry<BulletData> {
@@ -11,7 +8,7 @@ public class BulletData implements RepositoryEntry<BulletData> {
 
 	private TargetBot target;
 
-	private Point2D.Double origin;
+	private Point origin;
 
 	/**
 	 * Main constructor
@@ -20,7 +17,7 @@ public class BulletData implements RepositoryEntry<BulletData> {
 	 * @param target - the target for the bullet
 	 * @param origin - the point where the bullet was originally fired from
 	 */
-	public BulletData(Bullet bullet, TargetBot target, Double origin) {
+	public BulletData(Bullet bullet, TargetBot target, Point origin) {
 		this.bullet = bullet;
 		this.target = target;
 		this.origin = origin;
@@ -69,7 +66,7 @@ public class BulletData implements RepositoryEntry<BulletData> {
 	/**
 	 * @return the origin
 	 */
-	public Point2D.Double getOrigin() {
+	public Point getOrigin() {
 		return this.origin;
 	}
 
