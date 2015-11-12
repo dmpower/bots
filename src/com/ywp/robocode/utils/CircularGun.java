@@ -123,14 +123,16 @@ public class CircularGun implements Gun {
 		boolean results = false;
 		if(this.owningBot.getGunHeat() == 0 && this.owningBot.getGunTurnRemainingRadians() < (GUN_TURN_THRESHOLD)){
 			Bullet theBullet = this.owningBot.setFireBullet(bulletPower);
-			BulletData newEntry = new BulletData(theBullet, this.lastTarget, BotTools.convertToPoint(this.owningBot));
-			this.bullets.add(newEntry);
-			results = true;
-			if(!this.stats.containsKey(this.lastTarget))
-			{
-				this.stats.put(this.lastTarget.getGroupId(), new GunStats());
+			if(null != theBullet) { // only log an entry if we succeeded to fire
+				BulletData newEntry = new BulletData(theBullet, this.lastTarget, BotTools.convertToPoint(this.owningBot));
+				this.bullets.add(newEntry);
+				results = true;
+				if(!this.stats.containsKey(this.lastTarget))
+				{
+					this.stats.put(this.lastTarget.getGroupId(), new GunStats());
+				}
+				this.stats.get(this.lastTarget.getGroupId()).addShot();
 			}
-			this.stats.get(this.lastTarget.getGroupId()).addShot();
 		}
 		return results;
 	}
