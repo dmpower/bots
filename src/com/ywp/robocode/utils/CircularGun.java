@@ -31,8 +31,6 @@ public class CircularGun implements Gun {
 	private RepositoryManager<BulletData> bullets = new RepositoryManager<>();
 	private Map<String,GunStats> stats = new HashMap<>();
 
-	private static Rectangle2D.Double _battleField = null;
-
 	/**
 	 * @param targetRepository
 	 * @param owningBot
@@ -82,7 +80,7 @@ public class CircularGun implements Gun {
 		Point predictedPosition = BotTools.project(origin, targetEntry1.getDistance(), absBearing);
 
 		double timeDelta = 0;
-		while ( (++timeDelta) * bulletSpeed < origin.distance(predictedPosition) ){
+		while ( (timeDelta++) * bulletSpeed < origin.distance(predictedPosition) ){
 			predictedPosition = BotTools.project(predictedPosition, speed, predictedHeading);
 			predictedHeading += turnRate;
 			if (! battleField.contains(predictedPosition)) {
@@ -102,7 +100,7 @@ public class CircularGun implements Gun {
 		g.drawLine((int)origin.getX(), (int)origin.getY(), (int)tempPoint.getX(), (int)tempPoint.getY());
 
 		// this needs fixed.
-		double firingAdjustment = Utils.normalAbsoluteAngle(absBearing-this.owningBot.getGunHeadingRadians());
+		double firingAdjustment = Utils.normalRelativeAngle(absBearing-this.owningBot.getGunHeadingRadians());
 		this.owningBot.setTurnGunRightRadians(firingAdjustment);
 		return firingAdjustment;
 	}
