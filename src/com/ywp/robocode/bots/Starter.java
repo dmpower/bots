@@ -43,6 +43,7 @@ public class Starter extends AdvancedRobot {
 	double sweepTime = 0d;
 	static final double SWEEP_INTERVAL = 100d;
 	static final double RADAR_TOLLARENCE = Rules.RADAR_TURN_RATE_RADIANS/32;
+	// allowing a full sweep causes slippage. This allows it to adjust to keep target centered
 	static final double RADAR_MAX_SWEEP  = Rules.RADAR_TURN_RATE_RADIANS-RADAR_TOLLARENCE;
 	static final double RADAR_HALF_SWEEP = RADAR_MAX_SWEEP/2;
 	private static double RAY;
@@ -328,9 +329,9 @@ public class Starter extends AdvancedRobot {
 			angle = angle + (turnDir * (RADAR_HALF_SWEEP-RADAR_TOLLARENCE));
 			// Do not adjust more than the max turn rate
 			if( 1 == turnDir) {
-				angle=Math.min(angle, Rules.RADAR_TURN_RATE_RADIANS);
+				angle=Math.min(angle, RADAR_MAX_SWEEP);
 			}else {
-				angle=Math.max(angle, turnDir * Rules.RADAR_TURN_RATE_RADIANS);
+				angle=Math.max(angle, turnDir * RADAR_MAX_SWEEP);
 			}
 			setTurnRadarRightRadians(Utils.normalRelativeAngle(angle));
 		}
