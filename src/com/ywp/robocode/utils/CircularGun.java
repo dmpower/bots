@@ -29,7 +29,7 @@ public class CircularGun implements Gun {
 	private RepositoryManager<TargetBot> targetRepository;
 	private AdvancedRobot owningBot;
 	private RepositoryManager<BulletData> bullets = new RepositoryManager<>();
-	private Map<String,GunStats> stats = new HashMap<>();
+	private static Map<String,GunStats> stats = new HashMap<>();
 
 	/**
 	 * @param targetRepository

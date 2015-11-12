@@ -24,7 +24,7 @@ public class HeadOnGun implements Gun {
 	private AdvancedRobot owningBot;
 	private TargetBot lastTarget = null;
 	private Map<String,Vector<Bullet>> bullets = new HashMap<>();
-	private Map<String,GunStats> stats = new HashMap<>();
+	private static Map<String,GunStats> stats = new HashMap<>();
 
 	public HeadOnGun(AdvancedRobot owner) {
 		this.owningBot = owner;
