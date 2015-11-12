@@ -3,11 +3,11 @@
  */
 package com.ywp.robocode.utils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Queue;
 import java.util.Set;
 import java.util.Vector;
 
@@ -22,7 +22,7 @@ import java.util.Vector;
 public class RepositoryManager <E> {
 
 	private final int threshold;
-	private Map<String, Queue<RepositoryEntry<E>>> repository = new HashMap<String, Queue<RepositoryEntry <E>>>();
+	private Map<String, List<RepositoryEntry<E>>> repository = new HashMap<String, List<RepositoryEntry <E>>>();
 
 	/**
 	 * Default constructor
@@ -50,17 +50,17 @@ public class RepositoryManager <E> {
 				}
 			}
 		} else{
-			this.repository.put(newEntry.getGroupId(), new LinkedList<RepositoryEntry<E>>());
+			this.repository.put(newEntry.getGroupId(), new ArrayList<RepositoryEntry<E>>());
 		}
 
 		if (!isPresent){
-			Queue<RepositoryEntry<E>> tempQueue = this.repository.get(newEntry.getGroupId());
-			boolean results = tempQueue.offer(newEntry);
-			System.out.println(this.getClass().getName() + " : adding " + (results?"Suceeded":"Failed") + ".");
-			if ( this.threshold < tempQueue.size()){
-				tempQueue.remove();
+			List<RepositoryEntry<E>> tempList = this.repository.get(newEntry.getGroupId());
+			tempList.add(0, newEntry);
+			if ( this.threshold < tempList.size()){
+				System.out.println(this.getClass().getName() + " : removing an extra.");
+				tempList.remove(tempList.size()-1);
 			}
-			this.repository.put(newEntry.getGroupId(), tempQueue); // I guess you have to remember to update
+			System.out.println(this.getClass().getName() + " : updating entry. queue size: " + tempList.size());
 
 		}
 	}
@@ -82,10 +82,10 @@ public class RepositoryManager <E> {
 
 	public void remove(RepositoryEntry<E> entry){
 		if (this.repository.containsKey(entry.getGroupId())){
-			Queue<RepositoryEntry<E>> tempQueue = this.repository.get(entry.getGroupId());
-			for (RepositoryEntry<E> currentEntry : tempQueue) {
+			List<RepositoryEntry<E>> tempList = this.repository.get(entry.getGroupId());
+			for (RepositoryEntry<E> currentEntry : tempList) {
 				if(currentEntry.getUniqueId().equals(entry.getUniqueId())){
-					tempQueue.remove(currentEntry);
+					tempList.remove(currentEntry);
 					break; // there should only ever be one
 				}
 			}
@@ -95,10 +95,10 @@ public class RepositoryManager <E> {
 	public void remove(Vector<RepositoryEntry<E>> entries){
 		for (RepositoryEntry<E> entry : entries) {
 			if (this.repository.containsKey(entry.getGroupId())){
-				Queue<RepositoryEntry<E>> tempQueue = this.repository.get(entry.getGroupId());
-				for (RepositoryEntry<E> currentEntry : tempQueue) {
+				List<RepositoryEntry<E>> tempList = this.repository.get(entry.getGroupId());
+				for (RepositoryEntry<E> currentEntry : tempList) {
 					if(currentEntry.getUniqueId().equals(entry.getUniqueId())){
-						tempQueue.remove(currentEntry);
+						tempList.remove(currentEntry);
 						break; // there should only ever be once
 					}
 				}
@@ -113,10 +113,10 @@ public class RepositoryManager <E> {
 	public Vector<RepositoryEntry<E>> getAll(String groupId){
 		Vector<RepositoryEntry<E>> results = new Vector<>();
 		if (this.repository.containsKey(groupId)){
-			for ( RepositoryEntry<E> currentEntry: this.repository.get(groupId)) {
-				results.addElement(currentEntry);
-			}
-
+			//			for ( RepositoryEntry<E> currentEntry: this.repository.get(groupId)) {
+			//				results.addElement(currentEntry);
+			//			}
+			results.addAll(this.repository.get(groupId));
 		}
 		return results;
 	}
@@ -162,7 +162,7 @@ public class RepositoryManager <E> {
 
 	public Map<String, Integer> stats(){
 		Map<String, Integer> results = new HashMap<>();
-		for (Entry<String, Queue<RepositoryEntry<E>>> mapEntry: this.repository.entrySet()){
+		for (Entry<String, List<RepositoryEntry<E>>> mapEntry: this.repository.entrySet()){
 			results.put(mapEntry.getKey(), mapEntry.getValue().size());
 		}
 

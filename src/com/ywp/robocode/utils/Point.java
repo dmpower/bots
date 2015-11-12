@@ -21,6 +21,6 @@ public class Point extends Point2D.Double {
 	}
 
 	public double angle(Point2D.Double to) {
-		return Utils.normalRelativeAngleDegrees(angleRadians(to) * 180.0 / Math.PI);
+		return Utils.normalRelativeAngleDegrees(Math.toDegrees(angleRadians(to)));
 	}
 }

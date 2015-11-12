@@ -11,7 +11,7 @@ public class TargetBot implements RepositoryEntry<TargetBot>{
 	private final double bearing;
 	private final double distance;
 	private final double velocity;
-	private final double time;
+	private final long time;
 
 	public TargetBot(ScannedRobotEvent event){
 		this.name = event.getName();
@@ -124,7 +124,7 @@ public class TargetBot implements RepositoryEntry<TargetBot>{
 	 *
 	 * @return the time the target was seen
 	 */
-	public double getTime() {
+	public long getTime() {
 		return this.time;
 	}
 

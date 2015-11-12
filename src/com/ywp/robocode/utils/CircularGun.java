@@ -3,6 +3,7 @@
  */
 package com.ywp.robocode.utils;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.Rectangle2D;
 import java.io.PrintStream;
@@ -59,35 +60,51 @@ public class CircularGun implements Gun {
 			throw new IllegalStateException("Cannot aim an invalid gun. Please call isValid first.");
 		}
 		feedTarget(target);
-		double botSize = owningBot.getWidth();
+		double botSize = this.owningBot.getWidth();
 		double botHalfSize = botSize/2;
 		Rectangle2D.Double battleField =
 				new Rectangle2D.Double(botHalfSize, botHalfSize,
-						owningBot.getBattleFieldWidth()-botSize, owningBot.getBattleFieldHeight()-botSize);
+						this.owningBot.getBattleFieldWidth()-botSize, this.owningBot.getBattleFieldHeight()-botSize);
+		Graphics2D g = this.owningBot.getGraphics();
+
 		double bulletPower = getPower(target);
 		double bulletSpeed = Rules.getBulletSpeed(bulletPower);
+
 		Vector<TargetBot> targetData = this.targetRepository.getAllData(target);
 		TargetBot targetEntry1 = targetData.get(0);
 		TargetBot targetEntry2 = targetData.get(1);
+
 		double turnRate = targetEntry1.getHeadingRadians() - targetEntry2.getHeadingRadians();
 		double speed = targetEntry1.getVelocity();
 		double predictedHeading = targetEntry1.getHeadingRadians();
 		double absBearing=targetEntry1.getBearingRadians()+this.owningBot.getHeadingRadians();
 		Point origin = BotTools.convertToPoint(this.owningBot);
 		Point predictedPosition = BotTools.project(origin, targetEntry1.getDistance(), absBearing);
+
 		double timeDelta = 0;
 		while ( (++timeDelta) * bulletSpeed < origin.distance(predictedPosition) ){
 			predictedPosition = BotTools.project(predictedPosition, speed, predictedHeading);
 			predictedHeading += turnRate;
 			if (! battleField.contains(predictedPosition)) {
-				predictedPosition.x = Math.min(botHalfSize, Math.max(owningBot.getBattleFieldWidth()-botHalfSize, predictedPosition.getX()));
-				predictedPosition.y = Math.min(botHalfSize, Math.max(owningBot.getBattleFieldHeight()-botHalfSize, predictedPosition.getY()));
+				predictedPosition.x = Math.max(botHalfSize, Math.min(this.owningBot.getBattleFieldWidth()-botHalfSize, predictedPosition.getX()));
+				predictedPosition.y = Math.max(botHalfSize, Math.min(this.owningBot.getBattleFieldHeight()-botHalfSize, predictedPosition.getY()));
 				break; // hit wall we are done
 			}
+			g.setColor(Color.blue);
+			g.fillOval((int)predictedPosition.getX()-2,(int)predictedPosition.getY()-2,4,4);
 		}
 
-		double firingAdjustment = Utils.normalAbsoluteAngle(origin.angleRadians(predictedPosition)-owningBot.getGunHeadingRadians());
-		owningBot.setTurnGunRight(firingAdjustment);
+		int ray =  (int) (this.owningBot.getBattleFieldHeight()+this.owningBot.getBattleFieldWidth());
+		Point tempPoint = BotTools.project(origin, ray, this.owningBot.getGunHeadingRadians());
+		g.drawLine((int)origin.getX(), (int)origin.getY(), (int)tempPoint.getX(), (int)tempPoint.getY());
+
+		tempPoint = BotTools.project(origin, ray, origin.angleRadians(predictedPosition));
+		g.setColor(Color.green);
+		g.drawLine((int)origin.getX(), (int)origin.getY(), (int)tempPoint.getX(), (int)tempPoint.getY());
+
+		double absBearings = origin.angleRadians(predictedPosition) + this.owningBot.getHeadingRadians();
+		double firingAdjustment = Utils.normalAbsoluteAngle(absBearings+this.owningBot.getGunHeadingRadians());
+		this.owningBot.setTurnGunRight(firingAdjustment);
 		return firingAdjustment;
 	}
 
