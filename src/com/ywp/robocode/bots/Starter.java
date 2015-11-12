@@ -44,6 +44,7 @@ public class Starter extends AdvancedRobot {
 	static final double SWEEP_INTERVAL = 100d;
 	static final double RADAR_HALF_SWEEP = Rules.RADAR_TURN_RATE_RADIANS/2;
 	static final double RADAR_TOLLARENCE = RADAR_HALF_SWEEP/2;
+	private static double RAY;
 	RepositoryManager<TargetBot> targetManager;
 
 	Vector<Gun> gunRack = new Vector<>();
@@ -58,14 +59,7 @@ public class Starter extends AdvancedRobot {
 	 */
 	@Override
 	public void run() {
-		setAdjustGunForRobotTurn(true);
-		setAdjustRadarForGunTurn(true);
-		setColors(Color.red,Color.yellow,Color.blue);
-
-		this.targetManager = new RepositoryManager<TargetBot>();
-
-		//this.gunRack.add(new HeadOnGun(this));
-		this.gunRack.add(new CircularGun(this.targetManager, this));
+		initialize();
 
 		while(true){
 			//			out.println("New turn:" + getTime());
@@ -75,6 +69,18 @@ public class Starter extends AdvancedRobot {
 			this.endTurn = true;
 			execute();
 		}
+	}
+
+	private void initialize() {
+		RAY = this.getBattleFieldWidth() + this.getBattleFieldHeight();
+		setAdjustGunForRobotTurn(true);
+		setAdjustRadarForGunTurn(true);
+		setColors(Color.red,Color.yellow,Color.blue);
+
+		this.targetManager = new RepositoryManager<TargetBot>();
+
+		//this.gunRack.add(new HeadOnGun(this));
+		this.gunRack.add(new CircularGun(this.targetManager, this));
 	}
 
 	/* (non-Javadoc)
@@ -136,6 +142,20 @@ public class Starter extends AdvancedRobot {
 			g.setColor(Color.yellow);
 			g.drawLine((int)targetPoint.getX(), (int)targetPoint.getY(), (int)getX(), (int)getY());
 		}
+
+		Point origin = BotTools.convertToPoint(this);
+
+		// Gun direction
+		Point tempPoint = BotTools.project(origin, RAY, this.getGunHeadingRadians());
+		g.setColor(Color.blue);
+		g.drawLine((int)origin.getX(), (int)origin.getY(), (int)tempPoint.getX(), (int)tempPoint.getY());
+
+		// bot direction
+		tempPoint = BotTools.project(origin, RAY, this.getHeadingRadians());
+		g.setColor(Color.white);
+		g.drawLine((int)origin.getX(), (int)origin.getY(), (int)tempPoint.getX(), (int)tempPoint.getY());
+
+
 	}
 
 	/* (non-Javadoc)
