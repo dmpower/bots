@@ -42,8 +42,9 @@ public class Starter extends AdvancedRobot {
 	boolean isSweeping;
 	double sweepTime = 0d;
 	static final double SWEEP_INTERVAL = 100d;
-	static final double RADAR_HALF_SWEEP = Rules.RADAR_TURN_RATE_RADIANS/2;
-	static final double RADAR_TOLLARENCE = RADAR_HALF_SWEEP/16;
+	static final double RADAR_TOLLARENCE = Rules.RADAR_TURN_RATE_RADIANS/32;
+	static final double RADAR_MAX_SWEEP  = Rules.RADAR_TURN_RATE_RADIANS-RADAR_TOLLARENCE;
+	static final double RADAR_HALF_SWEEP = RADAR_MAX_SWEEP/2;
 	private static double RAY;
 	RepositoryManager<TargetBot> targetManager;
 
@@ -72,10 +73,11 @@ public class Starter extends AdvancedRobot {
 	}
 
 	private void initialize() {
-		RAY = this.getBattleFieldWidth() + this.getBattleFieldHeight();
+		RAY = getBattleFieldWidth() + getBattleFieldHeight();
 		setAdjustGunForRobotTurn(true);
 		setAdjustRadarForGunTurn(true);
 		setColors(Color.red,Color.yellow,Color.blue);
+		setBulletColor(Color.red);
 
 		this.targetManager = new RepositoryManager<TargetBot>();
 
@@ -146,12 +148,12 @@ public class Starter extends AdvancedRobot {
 		Point origin = BotTools.convertToPoint(this);
 
 		// Gun direction
-		Point tempPoint = BotTools.project(origin, RAY, this.getGunHeadingRadians());
+		Point tempPoint = BotTools.project(origin, RAY, getGunHeadingRadians());
 		g.setColor(Color.blue);
 		g.drawLine((int)origin.getX(), (int)origin.getY(), (int)tempPoint.getX(), (int)tempPoint.getY());
 
 		// bot direction
-		tempPoint = BotTools.project(origin, RAY, this.getHeadingRadians());
+		tempPoint = BotTools.project(origin, RAY, getHeadingRadians());
 		g.setColor(Color.white);
 		g.drawLine((int)origin.getX(), (int)origin.getY(), (int)tempPoint.getX(), (int)tempPoint.getY());
 
@@ -321,8 +323,15 @@ public class Starter extends AdvancedRobot {
 			double angle=currentTarget().getBearingRadians()+getHeadingRadians();
 			//true on adjustment
 			angle = Utils.normalRelativeAngle(angle-getRadarHeadingRadians());
+			int turnDir = angle>0?1:-1;
 			//additional adjustment to maximize sweep
-			angle = angle + ((angle>0?1:-1) * RADAR_HALF_SWEEP);
+			angle = angle + (turnDir * (RADAR_HALF_SWEEP-RADAR_TOLLARENCE));
+			// Do not adjust more than the max turn rate
+			if( 1 == turnDir) {
+				angle=Math.min(angle, Rules.RADAR_TURN_RATE_RADIANS);
+			}else {
+				angle=Math.max(angle, turnDir * Rules.RADAR_TURN_RATE_RADIANS);
+			}
 			setTurnRadarRightRadians(Utils.normalRelativeAngle(angle));
 		}
 
@@ -405,5 +414,10 @@ public class Starter extends AdvancedRobot {
 			this.currentTargetData = targetData.firstElement();
 		}
 		return this.currentTargetData;
+	}
+
+	@Override
+	public void setTurnGunRightRadians(double radians) {
+		super.setTurnGunRightRadians(radians);
 	}
 }
