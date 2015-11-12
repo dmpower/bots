@@ -30,7 +30,8 @@ public class Starter extends AdvancedRobot {
 	 * change these statistics to see different graphics.
 	 */
 	final static boolean PAINT_MOVEMENT=true;
-	final static boolean PAINT_GUN=false;
+	final static boolean PAINT_GUN=true;
+	final static boolean PAINT_BOT_RAYS=true;
 
 	ArrayList<MovementWave> moveWaves=new ArrayList<MovementWave>();
 
@@ -46,10 +47,13 @@ public class Starter extends AdvancedRobot {
 	// allowing a full sweep causes slippage. This allows it to adjust to keep target centered
 	static final double RADAR_MAX_SWEEP  = Rules.RADAR_TURN_RATE_RADIANS-RADAR_TOLLARENCE;
 	static final double RADAR_HALF_SWEEP = RADAR_MAX_SWEEP/2;
+
 	private static double RAY;
+
 	RepositoryManager<TargetBot> targetManager;
 
 	Vector<Gun> gunRack = new Vector<>();
+
 	private boolean endTurn = true;
 	private long time;
 	private static Rectangle2D.Double battleField = null;
@@ -138,27 +142,29 @@ public class Starter extends AdvancedRobot {
 			}
 		}
 
-		if (hasTarget()){
-			Point selfPoint = BotTools.convertToPoint(this);
-			double absBearing=currentTarget().getBearingRadians()+getHeadingRadians();
-			Point targetPoint = BotTools.project(selfPoint, currentTarget().getDistance()+getBattleFieldWidth()*2, absBearing);
-			g.setColor(Color.yellow);
-			g.drawLine((int)targetPoint.getX(), (int)targetPoint.getY(), (int)getX(), (int)getY());
+		if(PAINT_BOT_RAYS) {
+
+			if (hasTarget()){
+				Point selfPoint = BotTools.convertToPoint(this);
+				double absBearing=currentTarget().getBearingRadians()+getHeadingRadians();
+				Point targetPoint = BotTools.project(selfPoint, currentTarget().getDistance()+getBattleFieldWidth()*2, absBearing);
+				g.setColor(Color.yellow);
+				g.drawLine((int)targetPoint.getX(), (int)targetPoint.getY(), (int)getX(), (int)getY());
+			}
+
+			Point origin = BotTools.convertToPoint(this);
+
+			// Gun direction
+			Point tempPoint = BotTools.project(origin, RAY, getGunHeadingRadians());
+			g.setColor(Color.blue);
+			g.drawLine((int)origin.getX(), (int)origin.getY(), (int)tempPoint.getX(), (int)tempPoint.getY());
+
+			// bot direction
+			tempPoint = BotTools.project(origin, RAY, getHeadingRadians());
+			g.setColor(Color.white);
+			g.drawLine((int)origin.getX(), (int)origin.getY(), (int)tempPoint.getX(), (int)tempPoint.getY());
+
 		}
-
-		Point origin = BotTools.convertToPoint(this);
-
-		// Gun direction
-		Point tempPoint = BotTools.project(origin, RAY, getGunHeadingRadians());
-		g.setColor(Color.blue);
-		g.drawLine((int)origin.getX(), (int)origin.getY(), (int)tempPoint.getX(), (int)tempPoint.getY());
-
-		// bot direction
-		tempPoint = BotTools.project(origin, RAY, getHeadingRadians());
-		g.setColor(Color.white);
-		g.drawLine((int)origin.getX(), (int)origin.getY(), (int)tempPoint.getX(), (int)tempPoint.getY());
-
-
 	}
 
 	/* (non-Javadoc)
