@@ -43,7 +43,7 @@ public class Starter extends AdvancedRobot {
 	double sweepTime = 0d;
 	static final double SWEEP_INTERVAL = 100d;
 	static final double RADAR_HALF_SWEEP = Rules.RADAR_TURN_RATE_RADIANS/2;
-	static final double RADAR_TOLLARENCE = RADAR_HALF_SWEEP/2;
+	static final double RADAR_TOLLARENCE = RADAR_HALF_SWEEP/16;
 	private static double RAY;
 	RepositoryManager<TargetBot> targetManager;
 
@@ -317,12 +317,18 @@ public class Starter extends AdvancedRobot {
 		}
 
 		if(!this.isSweeping && hasTarget() && currentTarget().getTime() == currentTime){
-			this.out.println("Radar scanned bot, turn back");
-			double absBearing=currentTarget().getBearingRadians()+getHeadingRadians();
-			setTurnRadarRightRadians(Utils.normalRelativeAngle(absBearing-getRadarHeadingRadians())-(RADAR_HALF_SWEEP));
+			//absBearing
+			double angle=currentTarget().getBearingRadians()+getHeadingRadians();
+			//true on adjustment
+			angle = Utils.normalRelativeAngle(angle-getRadarHeadingRadians());
+			//additional adjustment to maximize sweep
+			angle = angle + ((angle>0?1:-1) * RADAR_HALF_SWEEP);
+			setTurnRadarRightRadians(Utils.normalRelativeAngle(angle));
 		}
 
-		if(Math.abs(getRadarTurnRemainingRadians())< (RADAR_TOLLARENCE)){
+		this.out.println("Rader remaining turn: " + getRadarTurnRemainingRadians());
+
+		if(Math.abs(getRadarTurnRemainingRadians())< RADAR_TOLLARENCE){
 			this.out.println("Radar completed turn");
 			// basically if there is only a little bit of turn remaining, we want to turn
 			// the radar back anyways. Otherwise the radar stops mid turn and we lose most

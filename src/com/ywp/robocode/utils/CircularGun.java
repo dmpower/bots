@@ -132,7 +132,7 @@ public class CircularGun implements Gun {
 			{
 				this.stats.put(this.lastTarget.getGroupId(), new GunStats());
 			}
-			this.stats.get(this.lastTarget).addShot();
+			this.stats.get(this.lastTarget.getGroupId()).addShot();
 		}
 		return results;
 	}

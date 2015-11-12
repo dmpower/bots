@@ -57,10 +57,10 @@ public class RepositoryManager <E> {
 			List<RepositoryEntry<E>> tempList = this.repository.get(newEntry.getGroupId());
 			tempList.add(0, newEntry);
 			if ( this.threshold < tempList.size()){
-				System.out.println(this.getClass().getName() + " : removing an extra.");
+				//				System.out.println(this.getClass().getName() + " : removing an extra.");
 				tempList.remove(tempList.size()-1);
 			}
-			System.out.println(this.getClass().getName() + " : updating entry. queue size: " + tempList.size());
+			//			System.out.println(this.getClass().getName() + " : updating entry. queue size: " + tempList.size());
 
 		}
 	}
