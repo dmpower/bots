@@ -93,18 +93,17 @@ public class CircularGun implements Gun {
 			g.setColor(Color.blue);
 			g.fillOval((int)predictedPosition.getX()-2,(int)predictedPosition.getY()-2,4,4);
 		}
-
 		int ray =  (int) (this.owningBot.getBattleFieldHeight()+this.owningBot.getBattleFieldWidth());
-		Point tempPoint = BotTools.project(origin, ray, this.owningBot.getGunHeadingRadians());
-		g.drawLine((int)origin.getX(), (int)origin.getY(), (int)tempPoint.getX(), (int)tempPoint.getY());
 
-		tempPoint = BotTools.project(origin, ray, origin.angleRadians(predictedPosition));
+		// target gun direction
+		absBearing = origin.angleRadians(predictedPosition);// this is proven accurate
+		Point tempPoint = BotTools.project(origin, ray, absBearing);
 		g.setColor(Color.green);
 		g.drawLine((int)origin.getX(), (int)origin.getY(), (int)tempPoint.getX(), (int)tempPoint.getY());
 
-		double absBearings = origin.angleRadians(predictedPosition) + this.owningBot.getHeadingRadians();
-		double firingAdjustment = Utils.normalAbsoluteAngle(absBearings+this.owningBot.getGunHeadingRadians());
-		this.owningBot.setTurnGunRight(firingAdjustment);
+		// this needs fixed.
+		double firingAdjustment = Utils.normalAbsoluteAngle(absBearing-this.owningBot.getGunHeadingRadians());
+		this.owningBot.setTurnGunRightRadians(firingAdjustment);
 		return firingAdjustment;
 	}
 
@@ -129,6 +128,11 @@ public class CircularGun implements Gun {
 			BulletData newEntry = new BulletData(theBullet, this.lastTarget, BotTools.convertToPoint(this.owningBot));
 			this.bullets.add(newEntry);
 			results = true;
+			if(!this.stats.containsKey(this.lastTarget))
+			{
+				this.stats.put(this.lastTarget.getGroupId(), new GunStats());
+			}
+			this.stats.get(this.lastTarget).addShot();
 		}
 		return results;
 	}
