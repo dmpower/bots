@@ -3,6 +3,7 @@
  */
 package com.ywp.robocode.utils;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.io.PrintStream;
 import java.util.HashMap;
@@ -25,6 +26,7 @@ public class HeadOnGun implements Gun {
 	private TargetBot lastTarget = null;
 	private Map<String,Vector<Bullet>> bullets = new HashMap<>();
 	private static Map<String,GunStats> stats = new HashMap<>();
+	private double ray = this.owningBot.getBattleFieldHeight() + this.owningBot.getBattleFieldWidth();
 
 	public HeadOnGun(AdvancedRobot owner) {
 		this.owningBot = owner;
@@ -72,10 +74,10 @@ public class HeadOnGun implements Gun {
 					this.bullets.put(this.lastTarget.getName(), new Vector<>());
 				}
 				this.bullets.get(this.lastTarget.getName()).add(theBullet);
-				if( ! this.stats.containsKey(this.lastTarget.getName())){
-					this.stats.put(this.lastTarget.getName(), new GunStats());
+				if( ! HeadOnGun.stats.containsKey(this.lastTarget.getName())){
+					HeadOnGun.stats.put(this.lastTarget.getName(), new GunStats());
 				}
-				this.stats.get(this.lastTarget.getName()).addShot();
+				HeadOnGun.stats.get(this.lastTarget.getName()).addShot();
 				results = true;
 			}
 		}
@@ -92,13 +94,13 @@ public class HeadOnGun implements Gun {
 			for (Bullet bullet : target.getValue()) {
 				if(!bullet.isActive()){
 					expired.addElement(bullet);
-					if(!this.stats.containsKey(target.getKey()))
+					if(!HeadOnGun.stats.containsKey(target.getKey()))
 					{
-						this.stats.put(target.getKey(), new GunStats());
+						HeadOnGun.stats.put(target.getKey(), new GunStats());
 					}
 					if (target.getKey().equals(bullet.getVictim())){
 						// basically if I hit my intended target, add a hit
-						this.stats.get(target.getKey()).addHit();
+						HeadOnGun.stats.get(target.getKey()).addHit();
 					}
 					this.owningBot.out.println(this.getClass().getName() + " - time: " + this.owningBot.getTime() + " target: " + target.getKey() + " Bullet: " + bullet.toString());
 					//target.getValue().remove(bullet); // this does not work
@@ -145,7 +147,7 @@ public class HeadOnGun implements Gun {
 	public GunStats getStats() {
 		int hitTotal = 0;
 		int shotTotal = 0;
-		for (GunStats curStat : this.stats.values()) {
+		for (GunStats curStat : HeadOnGun.stats.values()) {
 			hitTotal += curStat.getHits();
 			shotTotal += curStat.getShots();
 		}
@@ -157,7 +159,7 @@ public class HeadOnGun implements Gun {
 	 */
 	@Override
 	public GunStats getStats(TargetBot target) {
-		GunStats results = this.stats.get(target.getName());
+		GunStats results = HeadOnGun.stats.get(target.getName());
 		if(null == results){
 			results = new GunStats();
 		}
@@ -167,7 +169,7 @@ public class HeadOnGun implements Gun {
 	@Override
 	public void printAllStats(PrintStream out){
 		out.println(this.getClass().getName() + " - collected stats");
-		for ( Entry<String, GunStats> curEntry : this.stats.entrySet()) {
+		for ( Entry<String, GunStats> curEntry : HeadOnGun.stats.entrySet()) {
 			out.print(curEntry.getKey() + " - ");
 			out.println(curEntry.getValue().toString());
 		}
@@ -179,6 +181,11 @@ public class HeadOnGun implements Gun {
 	 */
 	@Override
 	public void onPaint(Graphics2D g){
-		// really nothing to paint for a head on gun I could make rays out of the bullets?
+		if(this.lastTarget!=null) {
+			double absBearing=this.lastTarget.getBearingRadians()+this.owningBot.getHeadingRadians();
+			Point rayPoint = BotTools.project(BotTools.convertToPoint(this.owningBot),this.ray,absBearing);
+			g.setColor(Color.red);
+			g.drawLine((int)this.owningBot.getX(), (int)this.owningBot.getY(), (int)rayPoint.getX(), (int)rayPoint.getY());
+		}
 	}
 }
