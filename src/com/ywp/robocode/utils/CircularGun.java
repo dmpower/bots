@@ -30,7 +30,7 @@ public class CircularGun implements Gun {
 	private AdvancedRobot owningBot;
 	private RepositoryManager<BulletData> bullets = new RepositoryManager<>();
 	private static Map<String,GunStats> stats = new HashMap<>();
-	private double ray = this.owningBot.getBattleFieldHeight() + this.owningBot.getBattleFieldWidth();
+	private double ray;
 	private static final int TARGET_POINT_SIZE = 8;
 
 	private Point aimPoint;
@@ -42,6 +42,7 @@ public class CircularGun implements Gun {
 	public CircularGun(RepositoryManager<TargetBot> targetRepository, AdvancedRobot owningBot) {
 		this.targetRepository = targetRepository;
 		this.owningBot = owningBot;
+		this.ray = this.owningBot.getBattleFieldHeight() + this.owningBot.getBattleFieldWidth();
 	}
 
 	/* (non-Javadoc)
@@ -237,15 +238,17 @@ public class CircularGun implements Gun {
 	 */
 	@Override
 	public void onPaint(Graphics2D g) {
-		// TODO Auto-generated method stub
-		g.setColor(Color.blue);
-		g.fillOval((int)this.aimPoint.getX()-(TARGET_POINT_SIZE/2),(int)this.aimPoint.getY()-(TARGET_POINT_SIZE/2),TARGET_POINT_SIZE,TARGET_POINT_SIZE);
 
-		Point origin = BotTools.convertToPoint(this.owningBot);
-		double absBearing = origin.angleRadians(this.aimPoint);// this is proven accurate
-		Point tempPoint = BotTools.project(origin, this.ray, absBearing);
-		g.setColor(Color.green);
-		g.drawLine((int)origin.getX(), (int)origin.getY(), (int)tempPoint.getX(), (int)tempPoint.getY());
+		if(null != this.aimPoint){
+			g.setColor(Color.blue);
+			g.fillOval((int)this.aimPoint.getX()-(TARGET_POINT_SIZE/2),(int)this.aimPoint.getY()-(TARGET_POINT_SIZE/2),TARGET_POINT_SIZE,TARGET_POINT_SIZE);
+
+			Point origin = BotTools.convertToPoint(this.owningBot);
+			double absBearing = origin.angleRadians(this.aimPoint);// this is proven accurate
+			Point tempPoint = BotTools.project(origin, this.ray, absBearing);
+			g.setColor(Color.green);
+			g.drawLine((int)origin.getX(), (int)origin.getY(), (int)tempPoint.getX(), (int)tempPoint.getY());
+		}
 	}
 
 	/* (non-Javadoc)
