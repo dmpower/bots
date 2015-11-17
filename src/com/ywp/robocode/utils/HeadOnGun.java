@@ -26,10 +26,11 @@ public class HeadOnGun implements Gun {
 	private TargetBot lastTarget = null;
 	private Map<String,Vector<Bullet>> bullets = new HashMap<>();
 	private static Map<String,GunStats> stats = new HashMap<>();
-	private double ray = this.owningBot.getBattleFieldHeight() + this.owningBot.getBattleFieldWidth();
+	private double ray;
 
 	public HeadOnGun(AdvancedRobot owner) {
 		this.owningBot = owner;
+		this.ray = this.owningBot.getBattleFieldHeight() + this.owningBot.getBattleFieldWidth();
 	}
 
 	/* (non-Javadoc)
