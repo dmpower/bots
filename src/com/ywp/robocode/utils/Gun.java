@@ -30,16 +30,20 @@ public interface Gun {
 	 *
 	 * @param target - the target to aim at
 	 * @return Bearing in Radians to aim the gun at.
+	 * @throws IllegalStateException - remember to call isValid first
+	 * @see #isValid(TargetBot)
 	 */
-	double aimRadians(TargetBot target);
+	double aimRadians(TargetBot target) throws IllegalStateException;
 
 	/**
 	 * This asks the gun to aim at a specific target.
 	 *
 	 * @param target - the target to aim at
 	 * @return Bearing in Degrees to aim the gun at.
+	 * @throws IllegalStateException - remember to call isValid first
+	 * @see #isValid(TargetBot)
 	 */
-	double aim(TargetBot target);
+	double aim(TargetBot target) throws IllegalStateException;
 
 	/**
 	 * Fire this gun if it can.

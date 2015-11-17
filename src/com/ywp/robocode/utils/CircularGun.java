@@ -53,7 +53,7 @@ public class CircularGun implements Gun {
 	 * @see com.ywp.robocode.utils.Gun#aimRadians(com.ywp.robocode.utils.TargetBot)
 	 */
 	@Override
-	public double aimRadians(TargetBot target) {
+	public double aimRadians(TargetBot target) throws IllegalStateException {
 		if (! isValid(target)) {
 			throw new IllegalStateException("Cannot aim an invalid gun. Please call isValid first.");
 		}
@@ -109,8 +109,8 @@ public class CircularGun implements Gun {
 	 * @see com.ywp.robocode.utils.Gun#aim(com.ywp.robocode.utils.TargetBot)
 	 */
 	@Override
-	public double aim(TargetBot target) {
-		return Utils.normalRelativeAngleDegrees(aimRadians(target) * 180.0 / Math.PI);
+	public double aim(TargetBot target) throws IllegalStateException {
+		return Utils.normalRelativeAngleDegrees(Math.toDegrees(aimRadians(target)));
 	}
 
 	/* (non-Javadoc)
