@@ -31,6 +31,9 @@ public class CircularGun implements Gun {
 	private RepositoryManager<BulletData> bullets = new RepositoryManager<>();
 	private static Map<String,GunStats> stats = new HashMap<>();
 	private double ray = this.owningBot.getBattleFieldHeight() + this.owningBot.getBattleFieldWidth();
+	private static final int TARGET_POINT_SIZE = 8;
+
+	private Point aimPoint;
 
 	/**
 	 * @param targetRepository
@@ -78,29 +81,20 @@ public class CircularGun implements Gun {
 		double predictedHeading = targetEntry1.getHeadingRadians();
 		double absBearing=targetEntry1.getBearingRadians()+this.owningBot.getHeadingRadians();
 		Point origin = BotTools.convertToPoint(this.owningBot);
-		Point predictedPosition = BotTools.project(origin, targetEntry1.getDistance(), absBearing);
+		this.aimPoint = BotTools.project(origin, targetEntry1.getDistance(), absBearing);
 
 		double timeDelta = 0;
-		while ( (timeDelta++) * bulletSpeed < origin.distance(predictedPosition) ){
-			predictedPosition = BotTools.project(predictedPosition, speed, predictedHeading);
+		while ( (timeDelta++) * bulletSpeed < origin.distance(this.aimPoint) ){
+			this.aimPoint = BotTools.project(this.aimPoint, speed, predictedHeading);
 			predictedHeading += turnRate;
-			if (! battleField.contains(predictedPosition)) {
-				predictedPosition.x = Math.max(botHalfSize, Math.min(this.owningBot.getBattleFieldWidth()-botHalfSize, predictedPosition.getX()));
-				predictedPosition.y = Math.max(botHalfSize, Math.min(this.owningBot.getBattleFieldHeight()-botHalfSize, predictedPosition.getY()));
+			if (! battleField.contains(this.aimPoint)) {
+				this.aimPoint.x = Math.max(botHalfSize, Math.min(this.owningBot.getBattleFieldWidth()-botHalfSize, this.aimPoint.getX()));
+				this.aimPoint.y = Math.max(botHalfSize, Math.min(this.owningBot.getBattleFieldHeight()-botHalfSize, this.aimPoint.getY()));
 				break; // hit wall we are done
 			}
-			g.setColor(Color.blue);
-			g.fillOval((int)predictedPosition.getX()-2,(int)predictedPosition.getY()-2,4,4);
 		}
-		int ray =  (int) (this.owningBot.getBattleFieldHeight()+this.owningBot.getBattleFieldWidth());
 
-		// target gun direction
-		absBearing = origin.angleRadians(predictedPosition);// this is proven accurate
-		Point tempPoint = BotTools.project(origin, ray, absBearing);
-		g.setColor(Color.green);
-		g.drawLine((int)origin.getX(), (int)origin.getY(), (int)tempPoint.getX(), (int)tempPoint.getY());
-
-		// this needs fixed.
+		absBearing = origin.angleRadians(this.aimPoint);// this is proven accurate
 		double firingAdjustment = Utils.normalRelativeAngle(absBearing-this.owningBot.getGunHeadingRadians());
 		this.owningBot.setTurnGunRightRadians(firingAdjustment);
 		return firingAdjustment;
@@ -244,7 +238,14 @@ public class CircularGun implements Gun {
 	@Override
 	public void onPaint(Graphics2D g) {
 		// TODO Auto-generated method stub
+		g.setColor(Color.blue);
+		g.fillOval((int)this.aimPoint.getX()-(TARGET_POINT_SIZE/2),(int)this.aimPoint.getY()-(TARGET_POINT_SIZE/2),TARGET_POINT_SIZE,TARGET_POINT_SIZE);
 
+		Point origin = BotTools.convertToPoint(this.owningBot);
+		double absBearing = origin.angleRadians(this.aimPoint);// this is proven accurate
+		Point tempPoint = BotTools.project(origin, this.ray, absBearing);
+		g.setColor(Color.green);
+		g.drawLine((int)origin.getX(), (int)origin.getY(), (int)tempPoint.getX(), (int)tempPoint.getY());
 	}
 
 	/* (non-Javadoc)
