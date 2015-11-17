@@ -30,6 +30,7 @@ public class CircularGun implements Gun {
 	private AdvancedRobot owningBot;
 	private RepositoryManager<BulletData> bullets = new RepositoryManager<>();
 	private static Map<String,GunStats> stats = new HashMap<>();
+	private double ray = this.owningBot.getBattleFieldHeight() + this.owningBot.getBattleFieldWidth();
 
 	/**
 	 * @param targetRepository
@@ -127,11 +128,11 @@ public class CircularGun implements Gun {
 				BulletData newEntry = new BulletData(theBullet, this.lastTarget, BotTools.convertToPoint(this.owningBot));
 				this.bullets.add(newEntry);
 				results = true;
-				if(!this.stats.containsKey(this.lastTarget))
+				if(!CircularGun.stats.containsKey(this.lastTarget))
 				{
-					this.stats.put(this.lastTarget.getGroupId(), new GunStats());
+					CircularGun.stats.put(this.lastTarget.getGroupId(), new GunStats());
 				}
-				this.stats.get(this.lastTarget.getGroupId()).addShot();
+				CircularGun.stats.get(this.lastTarget.getGroupId()).addShot();
 			}
 		}
 		return results;
@@ -148,13 +149,13 @@ public class CircularGun implements Gun {
 				Bullet bullet = bulletData.getBullet();
 				if(!bullet.isActive()){
 					expired.addElement(bulletData);
-					if(!this.stats.containsKey(target))
+					if(!CircularGun.stats.containsKey(target))
 					{
-						this.stats.put(target, new GunStats());
+						CircularGun.stats.put(target, new GunStats());
 					}
 					if (target.equals(bullet.getVictim())){
 						// basically if I hit my intended target, add a hit
-						this.stats.get(target).addHit();
+						CircularGun.stats.get(target).addHit();
 					}
 					this.owningBot.out.println(this.getClass().getName() + " - time: " + this.owningBot.getTime() + " target: " + target + " Bullet: " + bullet.toString());
 				}
@@ -218,7 +219,7 @@ public class CircularGun implements Gun {
 	public GunStats getStats() {
 		int hitTotal = 0;
 		int shotTotal = 0;
-		for (GunStats curStat : this.stats.values()) {
+		for (GunStats curStat : CircularGun.stats.values()) {
 			hitTotal += curStat.getHits();
 			shotTotal += curStat.getShots();
 		}
@@ -230,7 +231,7 @@ public class CircularGun implements Gun {
 	 */
 	@Override
 	public GunStats getStats(TargetBot target) {
-		GunStats results = this.stats.get(target.getName());
+		GunStats results = CircularGun.stats.get(target.getName());
 		if(null == results){
 			results = new GunStats();
 		}
@@ -252,7 +253,7 @@ public class CircularGun implements Gun {
 	@Override
 	public void printAllStats(PrintStream out) {
 		out.println(this.getClass().getName() + " - collected stats");
-		for ( Entry<String, GunStats> curEntry : this.stats.entrySet()) {
+		for ( Entry<String, GunStats> curEntry : CircularGun.stats.entrySet()) {
 			out.print(curEntry.getKey() + " - ");
 			out.println(curEntry.getValue().toString());
 		}
