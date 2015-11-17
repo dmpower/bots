@@ -10,6 +10,7 @@ import com.ywp.robocode.utils.BotTools;
 import com.ywp.robocode.utils.CircularGun;
 import com.ywp.robocode.utils.Gun;
 import com.ywp.robocode.utils.GunStats;
+import com.ywp.robocode.utils.HeadOnGun;
 import com.ywp.robocode.utils.MovementWave;
 import com.ywp.robocode.utils.Point;
 import com.ywp.robocode.utils.RepositoryManager;
@@ -89,7 +90,7 @@ public class Starter extends AdvancedRobot {
 
 		this.targetManager = new RepositoryManager<TargetBot>();
 
-		//this.gunRack.add(new HeadOnGun(this));
+		this.gunRack.add(new HeadOnGun(this));
 		this.gunRack.add(new CircularGun(this.targetManager, this));
 		resetTurn();
 	}
@@ -116,65 +117,6 @@ public class Starter extends AdvancedRobot {
 					logMovementWave(target,energyChange);
 				}
 			}
-		}
-	}
-
-	/* (non-Javadoc)
-	 * @see robocode.Robot#onPaint(java.awt.Graphics2D)
-	 */
-	@Override
-	public void onPaint(Graphics2D g) {
-		// TODO Auto-generated method stub
-		double radius;
-
-		/*
-		 * Paints the waves and the imaginary bullets from the movement.
-		 */
-		if(PAINT_MOVEMENT){
-			for(int i=0;i<this.moveWaves.size();i++){
-				MovementWave w=this.moveWaves.get(i);
-				g.setColor(Color.blue);
-				radius=(getTime()-w.startTime)*w.speed+w.speed;
-				Point hotBullet=BotTools.project(w.origin,radius,w.angle);
-				Point latBullet=BotTools.project(w.origin,radius,w.angle+w.latVel);
-				g.setColor(Color.red);
-				double sArc = Math.toDegrees(w.angle);
-				double eArc = Math.toDegrees(w.latVel);
-				g.drawArc((int)(w.origin.x-radius),(int)(w.origin.y-radius),(int)radius*2,(int)radius*2, (int)sArc, (int)eArc);
-				radius = 2d;
-				g.fillOval((int)(hotBullet.x-radius),(int)hotBullet.y-3,(int)(radius*2),(int)(radius*2));
-				g.fillOval((int)(latBullet.x-radius),(int)latBullet.y-3,(int)(radius*2),(int)(radius*2));
-			}
-		}
-
-		if(PAINT_GUN){
-			for (Gun gun : this.gunRack) {
-				gun.onPaint(g);
-			}
-		}
-
-		if(PAINT_BOT_RAYS) {
-
-			if (hasTarget()){
-				Point selfPoint = BotTools.convertToPoint(this);
-				double absBearing=currentTarget().getBearingRadians()+getHeadingRadians();
-				Point targetPoint = BotTools.project(selfPoint, currentTarget().getDistance()+getBattleFieldWidth()*2, absBearing);
-				g.setColor(Color.yellow);
-				g.drawLine((int)targetPoint.getX(), (int)targetPoint.getY(), (int)getX(), (int)getY());
-			}
-
-			Point origin = BotTools.convertToPoint(this);
-
-			// Gun direction
-			Point tempPoint = BotTools.project(origin, RAY, getGunHeadingRadians());
-			g.setColor(Color.blue);
-			g.drawLine((int)origin.getX(), (int)origin.getY(), (int)tempPoint.getX(), (int)tempPoint.getY());
-
-			// bot direction
-			tempPoint = BotTools.project(origin, RAY, getHeadingRadians());
-			g.setColor(Color.white);
-			g.drawLine((int)origin.getX(), (int)origin.getY(), (int)tempPoint.getX(), (int)tempPoint.getY());
-
 		}
 	}
 
@@ -379,12 +321,24 @@ public class Starter extends AdvancedRobot {
 		/*
 		 * Aiming our gun and firing
 		 */
+		Gun selectedGun = this.gunRack.firstElement();
+		GunStats selectedGunStats = selectedGun.getStats(currentTarget());
+		GunStats curGunStats = null;
 		if (hasTarget()){
 			try {
-				if(this.gunRack.get(0).isValid(currentTarget())) {
-					this.gunRack.get(0).aimRadians(currentTarget());
-					this.gunRack.get(0).fire();
+				for (Gun gun : this.gunRack) {
+					if(gun.isValid(currentTarget())) {
+						gun.feedTarget(currentTarget());
+						curGunStats = gun.getStats(currentTarget());
+						if (compareGunStats(curGunStats, selectedGunStats) > 0)
+						{
+							selectedGun = gun;
+							selectedGunStats = curGunStats;
+						}
+					}
 				}
+				selectedGun.aimRadians(currentTarget());
+				selectedGun.fire();
 			} catch (Exception e) {
 				// log and eat it
 				this.out.println(e.getMessage());
@@ -396,6 +350,19 @@ public class Starter extends AdvancedRobot {
 			this.out.print(gun.getClass().toString() + ": ");
 			this.out.println(stats.toString());
 		}
+	}
+
+	private int compareGunStats(GunStats gunStats1, GunStats gunStats2) {
+		int results = gunStats1.getShots()==0?1:0; // give 1 a chance
+		if (1 > results) {
+			results = gunStats2.getShots()==0?-1:0; // give 2 a chance
+		}
+		double averageDiff = gunStats1.getAverage() - gunStats2.getAverage();
+		if (0 == results && Math.abs(averageDiff)> 0.001) { // both have had chances, which is better?
+			results = averageDiff>0?1:-1;
+		}
+
+		return results;
 	}
 
 	/* (non-Javadoc)
@@ -444,4 +411,63 @@ public class Starter extends AdvancedRobot {
 	public void setTurnGunRightRadians(double radians) {
 		super.setTurnGunRightRadians(radians);
 	}
+	/* (non-Javadoc)
+	 * @see robocode.Robot#onPaint(java.awt.Graphics2D)
+	 */
+	@Override
+	public void onPaint(Graphics2D g) {
+		// TODO Auto-generated method stub
+		double radius;
+
+		/*
+		 * Paints the waves and the imaginary bullets from the movement.
+		 */
+		if(PAINT_MOVEMENT){
+			for(int i=0;i<this.moveWaves.size();i++){
+				MovementWave w=this.moveWaves.get(i);
+				g.setColor(Color.blue);
+				radius=(getTime()-w.startTime)*w.speed+w.speed;
+				Point hotBullet=BotTools.project(w.origin,radius,w.angle);
+				Point latBullet=BotTools.project(w.origin,radius,w.angle+w.latVel);
+				g.setColor(Color.red);
+				double sArc = Math.toDegrees(w.angle);
+				double eArc = Math.toDegrees(w.latVel);
+				g.drawArc((int)(w.origin.x-radius),(int)(w.origin.y-radius),(int)radius*2,(int)radius*2, (int)sArc, (int)eArc);
+				radius = 2d;
+				g.fillOval((int)(hotBullet.x-radius),(int)hotBullet.y-3,(int)(radius*2),(int)(radius*2));
+				g.fillOval((int)(latBullet.x-radius),(int)latBullet.y-3,(int)(radius*2),(int)(radius*2));
+			}
+		}
+
+		if(PAINT_GUN){
+			for (Gun gun : this.gunRack) {
+				gun.onPaint(g);
+			}
+		}
+
+		if(PAINT_BOT_RAYS) {
+
+			//			if (hasTarget()){
+			//				Point selfPoint = BotTools.convertToPoint(this);
+			//				double absBearing=currentTarget().getBearingRadians()+getHeadingRadians();
+			//				Point targetPoint = BotTools.project(selfPoint, RAY, absBearing);
+			//				g.setColor(Color.yellow);
+			//				g.drawLine((int)targetPoint.getX(), (int)targetPoint.getY(), (int)getX(), (int)getY());
+			//			}
+
+			Point origin = BotTools.convertToPoint(this);
+
+			// Gun direction
+			Point tempPoint = BotTools.project(origin, RAY, getGunHeadingRadians());
+			g.setColor(Color.blue);
+			g.drawLine((int)origin.getX(), (int)origin.getY(), (int)tempPoint.getX(), (int)tempPoint.getY());
+
+			// bot direction
+			tempPoint = BotTools.project(origin, RAY, getHeadingRadians());
+			g.setColor(Color.white);
+			g.drawLine((int)origin.getX(), (int)origin.getY(), (int)tempPoint.getX(), (int)tempPoint.getY());
+
+		}
+	}
+
 }
