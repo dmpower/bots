@@ -48,10 +48,11 @@ public class HeadOnGun implements Gun {
 	@Override
 	public double aimRadians(TargetBot target) {
 		feedTarget(target);
-		double absBearing=this.lastTarget.getBearingRadians()+this.owningBot.getHeadingRadians();
+		Point targetPoint = BotTools.project(this.lastTarget.getOrigin(), this.lastTarget.getDistance(), this.lastTarget.getAbsBearingRadians());
+		double absBearing = BotTools.convertToPoint(this.owningBot).angleRadians(targetPoint);
 		double targetAngle = Utils.normalRelativeAngle(absBearing-this.owningBot.getGunHeadingRadians());
 		this.owningBot.setTurnGunRightRadians(targetAngle);
-		return Utils.normalRelativeAngle(absBearing-this.owningBot.getGunHeadingRadians());
+		return targetAngle;
 	}
 
 	/* (non-Javadoc)
@@ -184,8 +185,12 @@ public class HeadOnGun implements Gun {
 	 */
 	@Override
 	public void onPaint(Graphics2D g){
+		// note, this seems to run before all other events, so it is one turn behind with what it is drawing.
 		if(this.lastTarget!=null) {
-			double absBearing=this.lastTarget.getBearingRadians()+this.owningBot.getHeadingRadians();
+			double absBearing=this.lastTarget.getAbsBearingRadians();
+			Point target = BotTools.project(this.lastTarget.getOrigin(), this.lastTarget.getDistance(), absBearing);
+			target.drawBot(this.owningBot.getGraphics(), Color.red);
+
 			Point rayPoint = BotTools.project(BotTools.convertToPoint(this.owningBot),this.ray,absBearing);
 			g.setColor(Color.red);
 			g.drawLine((int)this.owningBot.getX(), (int)this.owningBot.getY(), (int)rayPoint.getX(), (int)rayPoint.getY());
