@@ -187,8 +187,9 @@ public class HeadOnGun implements Gun {
 	public void onPaint(Graphics2D g){
 		// note, this seems to run before all other events, so it is one turn behind with what it is drawing.
 		if(this.lastTarget!=null) {
-			double absBearing=this.lastTarget.getAbsBearingRadians();
-			Point target = BotTools.project(this.lastTarget.getOrigin(), this.lastTarget.getDistance(), absBearing);
+//			double absBearing=this.lastTarget.getAbsBearingRadians();
+			Point target = this.lastTarget.getPoint();
+			double absBearing = BotTools.convertToPoint(this.owningBot).angleRadians(target);
 			target.drawBot(this.owningBot.getGraphics(), Color.red);
 
 			Point rayPoint = BotTools.project(BotTools.convertToPoint(this.owningBot),this.ray,absBearing);

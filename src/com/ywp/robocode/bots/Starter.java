@@ -497,7 +497,7 @@ public class Starter extends AdvancedRobot {
 				int botWidth = (int)getWidth();
 				int botHalfWidth = botWidth/2;
 				g.setColor(Color.yellow);
-				Point targetPoint = BotTools.convertToPoint(this, currentTarget());
+				Point targetPoint = currentTarget().getPoint();
 				g.drawRect((int)targetPoint.getX()-botHalfWidth, (int)targetPoint.getY()-botHalfWidth, botWidth, botWidth);
 			}
 		}

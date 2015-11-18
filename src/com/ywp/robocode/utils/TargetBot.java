@@ -166,6 +166,10 @@ public class TargetBot implements RepositoryEntry<TargetBot>{
 		return this.origin;
 	}
 
+	public Point getPoint() {
+		return BotTools.project(this.origin, this.distance, this.absBearing);
+	}
+
 	/* (non-Javadoc)
 	 * @see com.ywp.robocode.utils.RepositoryEntry#getGroupId()
 	 */
