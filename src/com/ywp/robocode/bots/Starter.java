@@ -486,7 +486,9 @@ public class Starter extends AdvancedRobot {
 
 		if(PAINT_GUN){
 			for (Gun gun : this.gunRack) {
-				gun.onPaint(g);
+				if(gun.isActive()) {
+					gun.onPaint(g);
+				}
 			}
 		}
 
