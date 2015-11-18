@@ -1,48 +1,57 @@
 package com.ywp.robocode.utils;
 
+import robocode.AdvancedRobot;
 import robocode.HitRobotEvent;
 import robocode.RobotDeathEvent;
 import robocode.ScannedRobotEvent;
+import robocode.util.Utils;
 
 public class TargetBot implements RepositoryEntry<TargetBot>{
 	private final String name;
 	private final double energy;
 	private final double heading;
 	private final double bearing;
+	private final double absBearing;
 	private final double distance;
 	private final double velocity;
-	private final long time;
+	private final long   time;
+	private final Point  origin;
 
-	public TargetBot(ScannedRobotEvent event){
-		this.name = event.getName();
-		this.energy = event.getEnergy();
-		this.heading = event.getHeadingRadians();
-		this.bearing = event.getBearingRadians();
-		this.distance = event.getDistance();
-		this.velocity = event.getVelocity();
-		this.time = event.getTime();
+	public TargetBot(AdvancedRobot source, ScannedRobotEvent event){
+		this.name       = event.getName();
+		this.energy     = event.getEnergy();
+		this.heading    = event.getHeadingRadians();
+		this.bearing    = event.getBearingRadians();
+		this.absBearing = Utils.normalAbsoluteAngle(event.getBearingRadians()+source.getHeadingRadians());
+		this.distance   = event.getDistance();
+		this.velocity   = event.getVelocity();
+		this.time       = event.getTime();
+		this.origin     = BotTools.convertToPoint(source);
 	}
 
-	public TargetBot(HitRobotEvent event, double botWidth){
-		this.name = event.getName();
-		this.energy = event.getEnergy();
-		this.heading = 0d;
-		this.bearing = event.getBearingRadians();
+	public TargetBot(AdvancedRobot source, HitRobotEvent event, double botWidth){
+		this.name       = event.getName();
+		this.energy     = event.getEnergy();
+		this.heading    = 0d;
+		this.bearing    = event.getBearingRadians();
+		this.absBearing = Utils.normalAbsoluteAngle(event.getBearingRadians()+source.getHeadingRadians());
 		// This is not entirely accurate, but it helps
-		this.distance = botWidth;
-		this.velocity = 0d;
-		this.time = event.getTime();
+		this.distance   = botWidth;
+		this.velocity   = 0d;
+		this.time       = event.getTime();
+		this.origin     = BotTools.convertToPoint(source);
 	}
 
-	public TargetBot(RobotDeathEvent event){
-		this.name = event.getName();
-		this.energy = 0d;
-		this.heading = 0d;
-		this.bearing = 0d;
-		this.distance = 0d;
-		this.velocity = 0d;
-		this.time = event.getTime();
-
+	public TargetBot(AdvancedRobot source, RobotDeathEvent event){
+		this.name       = event.getName();
+		this.energy     = 0d;
+		this.heading    = 0d;
+		this.bearing    = 0d;
+		this.absBearing = 0d;
+		this.distance   = 0d;
+		this.velocity   = 0d;
+		this.time       = event.getTime();
+		this.origin     = BotTools.convertToPoint(source);
 	}
 
 	/**
@@ -52,7 +61,7 @@ public class TargetBot implements RepositoryEntry<TargetBot>{
 	 * @return the bearing to the robot you scanned, in degrees
 	 */
 	public double getBearing() {
-		return this.bearing * 180.0 / Math.PI;
+		return Utils.normalRelativeAngleDegrees(Math.toDegrees(this.bearing));
 	}
 
 	/**
@@ -63,6 +72,26 @@ public class TargetBot implements RepositoryEntry<TargetBot>{
 	 */
 	public double getBearingRadians() {
 		return this.bearing;
+	}
+
+	/**
+	 * Returns the absolute bearing to the robot you scanned, relative to your robot's
+	 * heading, in degrees (0 <= getBearing() < 360)
+	 *
+	 * @return the bearing to the robot you scanned, in degrees
+	 */
+	public double getAbsBearing() {
+		return Utils.normalAbsoluteAngleDegrees(Math.toDegrees(this.absBearing));
+	}
+
+	/**
+	 * Returns the bearing to the robot you scanned, relative to your robot's
+	 * heading, in radians (0 <= getBearingRadians() < 2*PI)
+	 *
+	 * @return the bearing to the robot you scanned, in radians
+	 */
+	public double getAbsBearingRadians() {
+		return this.absBearing;
 	}
 
 	/**
@@ -128,6 +157,15 @@ public class TargetBot implements RepositoryEntry<TargetBot>{
 		return this.time;
 	}
 
+	/**
+	 * Returns the origin when TargetBot was created
+	 *
+	 * @return the origin when TargetBot was created.
+	 */
+	public Point getOrigin() {
+		return this.origin;
+	}
+
 	/* (non-Javadoc)
 	 * @see com.ywp.robocode.utils.RepositoryEntry#getGroupId()
 	 */
@@ -151,7 +189,6 @@ public class TargetBot implements RepositoryEntry<TargetBot>{
 	public TargetBot getData() {
 		return this;
 	}
-
 
 
 }
