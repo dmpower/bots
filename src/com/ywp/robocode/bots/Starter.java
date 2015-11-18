@@ -108,7 +108,7 @@ public class Starter extends AdvancedRobot {
 	@Override
 	public void onScannedRobot(ScannedRobotEvent event) {
 		this.out.println("onScannedRobot turn: " + getTime() + " for " + event.getName());
-		TargetBot target = new TargetBot(event);
+		TargetBot target = new TargetBot(this, event);
 		this.targetManager.add(target);
 		pickTarget(target);
 		if ( ! (this.isRanIntoBot && target.getName().equals(currentTarget().getName()))) {
@@ -130,7 +130,7 @@ public class Starter extends AdvancedRobot {
 		if (hasTarget() && currentTarget().getName().equals(event.getName())){
 			clearTarget();
 		}
-		this.targetManager.removeGroup(new TargetBot(event));
+		this.targetManager.removeGroup(new TargetBot(this, event));
 	}
 
 	/*
@@ -221,7 +221,7 @@ public class Starter extends AdvancedRobot {
 	public void onHitRobot(HitRobotEvent event) {
 		this.out.println("Turn: " + getTime() + " - hit " + event.getName() + " and they have " + event.getEnergy() + " left.");
 		// target who hit us unless we don't have any data on them - they died
-		TargetBot target = new TargetBot(event, getWidth());
+		TargetBot target = new TargetBot(this, event, getWidth());
 		if(this.targetManager.getAllGroupIds().contains(target.getGroupId())) {
 			setTarget(target);
 			this.isRanIntoBot = true;
@@ -344,16 +344,16 @@ public class Starter extends AdvancedRobot {
 		}
 		for (Gun gun : this.gunRack) {
 			gun.update();
-			if(hasTarget()){
-				GunStats stats = gun.getStats(currentTarget());
-				this.out.print(gun.getClass().toString() + ": ");
-				this.out.println(stats.toString() + " for " + currentTarget().getName());
-			}else{
-				GunStats stats = gun.getStats();
-				this.out.print(gun.getClass().toString() + ": ");
-				this.out.println(stats.toString());
-
-			}
+			//			if(hasTarget()){
+			//				GunStats stats = gun.getStats(currentTarget());
+			//				this.out.print(gun.getClass().toString() + ": ");
+			//				this.out.println(stats.toString() + " for " + currentTarget().getName());
+			//			}else{
+			//				GunStats stats = gun.getStats();
+			//				this.out.print(gun.getClass().toString() + ": ");
+			//				this.out.println(stats.toString());
+			//
+			//			}
 		}
 	}
 
@@ -460,12 +460,6 @@ public class Starter extends AdvancedRobot {
 			}
 		}
 
-		if(PAINT_GUN){
-			for (Gun gun : this.gunRack) {
-				gun.onPaint(g);
-			}
-		}
-
 		if(PAINT_BOT_RAYS) {
 
 			//			if (hasTarget()){
@@ -488,6 +482,12 @@ public class Starter extends AdvancedRobot {
 			g.setColor(Color.white);
 			g.drawLine((int)origin.getX(), (int)origin.getY(), (int)tempPoint.getX(), (int)tempPoint.getY());
 
+		}
+
+		if(PAINT_GUN){
+			for (Gun gun : this.gunRack) {
+				gun.onPaint(g);
+			}
 		}
 
 		if (PAINT_CURRENT_TARGET) {
