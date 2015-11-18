@@ -27,6 +27,7 @@ public class HeadOnGun implements Gun {
 	private Map<String,Vector<Bullet>> bullets = new HashMap<>();
 	private static Map<String,GunStats> stats = new HashMap<>();
 	private double ray;
+	private long lastFired = 0;
 
 	public HeadOnGun(AdvancedRobot owner) {
 		this.owningBot = owner;
@@ -79,6 +80,7 @@ public class HeadOnGun implements Gun {
 					HeadOnGun.stats.put(this.lastTarget.getName(), new GunStats());
 				}
 				HeadOnGun.stats.get(this.lastTarget.getName()).addShot();
+				this.lastFired = this.owningBot.getTime();
 				results = true;
 			}
 		}
@@ -189,4 +191,13 @@ public class HeadOnGun implements Gun {
 			g.drawLine((int)this.owningBot.getX(), (int)this.owningBot.getY(), (int)rayPoint.getX(), (int)rayPoint.getY());
 		}
 	}
+
+	/* (non-Javadoc)
+	 * @see com.ywp.robocode.utils.Gun#lastFired()
+	 */
+	@Override
+	public long lastFired() {
+		return this.lastFired;
+	}
+
 }

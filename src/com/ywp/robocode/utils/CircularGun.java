@@ -32,6 +32,11 @@ public class CircularGun implements Gun {
 	private static Map<String,GunStats> stats = new HashMap<>();
 	private double ray;
 	private static final int TARGET_POINT_SIZE = 8;
+	private static final double CALULATION_BUFFER = 0.001;
+	private long lastFired = 0;
+	private Rectangle2D.Double battleField;
+	private double botSize;
+	private double botHalfSize;
 
 	private Point aimPoint;
 
@@ -43,6 +48,13 @@ public class CircularGun implements Gun {
 		this.targetRepository = targetRepository;
 		this.owningBot = owningBot;
 		this.ray = this.owningBot.getBattleFieldHeight() + this.owningBot.getBattleFieldWidth();
+		this.botSize = this.owningBot.getWidth();
+		this.botHalfSize = this.botSize/2;
+		this.battleField =
+				new Rectangle2D.Double(this.botHalfSize-CALULATION_BUFFER, this.botHalfSize-CALULATION_BUFFER,
+						this.owningBot.getBattleFieldWidth()-this.botSize+(CALULATION_BUFFER*2),
+						this.owningBot.getBattleFieldHeight()-this.botSize+(CALULATION_BUFFER*2));
+
 	}
 
 	/* (non-Javadoc)
@@ -63,13 +75,6 @@ public class CircularGun implements Gun {
 			throw new IllegalStateException("Cannot aim an invalid gun. Please call isValid first.");
 		}
 		feedTarget(target);
-		double botSize = this.owningBot.getWidth();
-		double botHalfSize = botSize/2;
-		Rectangle2D.Double battleField =
-				new Rectangle2D.Double(botHalfSize, botHalfSize,
-						this.owningBot.getBattleFieldWidth()-botSize, this.owningBot.getBattleFieldHeight()-botSize);
-		Graphics2D g = this.owningBot.getGraphics();
-
 		double bulletPower = getPower(target);
 		double bulletSpeed = Rules.getBulletSpeed(bulletPower);
 
@@ -88,9 +93,9 @@ public class CircularGun implements Gun {
 		while ( (timeDelta++) * bulletSpeed < origin.distance(this.aimPoint) ){
 			this.aimPoint = BotTools.project(this.aimPoint, speed, predictedHeading);
 			predictedHeading += turnRate;
-			if (! battleField.contains(this.aimPoint)) {
-				this.aimPoint.x = Math.max(botHalfSize, Math.min(this.owningBot.getBattleFieldWidth()-botHalfSize, this.aimPoint.getX()));
-				this.aimPoint.y = Math.max(botHalfSize, Math.min(this.owningBot.getBattleFieldHeight()-botHalfSize, this.aimPoint.getY()));
+			if (! this.battleField.contains(this.aimPoint)) {
+				this.aimPoint.x = Math.max(this.botHalfSize, Math.min(this.owningBot.getBattleFieldWidth()-this.botHalfSize, this.aimPoint.getX()));
+				this.aimPoint.y = Math.max(this.botHalfSize, Math.min(this.owningBot.getBattleFieldHeight()-this.botHalfSize, this.aimPoint.getY()));
 				break; // hit wall we are done
 			}
 		}
@@ -123,8 +128,10 @@ public class CircularGun implements Gun {
 				BulletData newEntry = new BulletData(theBullet, this.lastTarget, BotTools.convertToPoint(this.owningBot));
 				this.bullets.add(newEntry);
 				results = true;
-				if(!CircularGun.stats.containsKey(this.lastTarget))
+				this.lastFired = this.owningBot.getTime();
+				if(!CircularGun.stats.containsKey(this.lastTarget.getGroupId()))
 				{
+					this.owningBot.out.println(this.getClass().getName() + " - new gun stats in fire for " + this.lastTarget.getName());
 					CircularGun.stats.put(this.lastTarget.getGroupId(), new GunStats());
 				}
 				CircularGun.stats.get(this.lastTarget.getGroupId()).addShot();
@@ -139,20 +146,21 @@ public class CircularGun implements Gun {
 	@Override
 	public void update() {
 		Vector<RepositoryEntry<BulletData>> expired = new Vector<>();
-		for (String target : this.bullets.getAllGroupIds()) {
-			for (BulletData bulletData : this.bullets.getAllData(target)) {
+		for (String targetGroupId : this.bullets.getAllGroupIds()) {
+			for (BulletData bulletData : this.bullets.getAllData(targetGroupId)) {
 				Bullet bullet = bulletData.getBullet();
 				if(!bullet.isActive()){
 					expired.addElement(bulletData);
-					if(!CircularGun.stats.containsKey(target))
+					if(!CircularGun.stats.containsKey(targetGroupId))
 					{
-						CircularGun.stats.put(target, new GunStats());
+						this.owningBot.out.println(this.getClass().getName() + " - new gun stats in update for " + targetGroupId);
+						CircularGun.stats.put(targetGroupId, new GunStats());
 					}
-					if (target.equals(bullet.getVictim())){
+					if (targetGroupId.equals(bullet.getVictim())){
 						// basically if I hit my intended target, add a hit
-						CircularGun.stats.get(target).addHit();
+						CircularGun.stats.get(targetGroupId).addHit();
 					}
-					this.owningBot.out.println(this.getClass().getName() + " - time: " + this.owningBot.getTime() + " target: " + target + " Bullet: " + bullet.toString());
+					this.owningBot.out.println(this.getClass().getName() + " - time: " + this.owningBot.getTime() + " target: " + targetGroupId + " Bullet: " + bullet.toString());
 				}
 			}
 		}
@@ -194,6 +202,10 @@ public class CircularGun implements Gun {
 				double turnDelta2 = targetData.get(1).getHeadingRadians() - targetData.get(2).getHeadingRadians();
 				results = turnDelta1 == turnDelta2;
 			}
+		}
+
+		if (! results) {
+			this.aimPoint = null;
 		}
 		return results;
 	}
@@ -267,5 +279,14 @@ public class CircularGun implements Gun {
 	private double getPower(TargetBot target) {
 		return Math.min(2.4,Math.min(target.getEnergy()/4,this.owningBot.getEnergy()/10));
 	}
+
+	/* (non-Javadoc)
+	 * @see com.ywp.robocode.utils.Gun#lastFired()
+	 */
+	@Override
+	public long lastFired() {
+		return this.lastFired;
+	}
+
 
 }

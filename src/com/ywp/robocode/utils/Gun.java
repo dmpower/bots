@@ -108,4 +108,10 @@ public interface Gun {
 	 * @param out - Where to print
 	 */
 	void printAllStats(PrintStream out);
+
+	/**
+	 * Returns the time/turn this gun last fired.
+	 * @return time this gun last fired
+	 */
+	long lastFired();
 }

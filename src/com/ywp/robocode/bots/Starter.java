@@ -30,9 +30,10 @@ public class Starter extends AdvancedRobot {
 	/*
 	 * change these statistics to see different graphics.
 	 */
-	final static boolean PAINT_MOVEMENT=true;
-	final static boolean PAINT_GUN=true;
-	final static boolean PAINT_BOT_RAYS=true;
+	private final static boolean PAINT_MOVEMENT       = true;
+	private final static boolean PAINT_GUN            = true;
+	private final static boolean PAINT_BOT_RAYS       = true;
+	private static final boolean PAINT_CURRENT_TARGET = true;
 
 	static double duelingDistance = 500d;
 	ArrayList<MovementWave> moveWaves=new ArrayList<MovementWave>();
@@ -41,6 +42,7 @@ public class Starter extends AdvancedRobot {
 	double lastTargetChange = 0d;
 	// Basically the time it take to turn the gun a full circle.
 	static final double targetChangeThreshold = 2*Math.PI/Rules.GUN_TURN_RATE_RADIANS;
+	private static final double GUN_FIRE_THRESHOLD = 200d;
 
 	boolean isSweeping;
 	double sweepTime = 0d;
@@ -321,19 +323,15 @@ public class Starter extends AdvancedRobot {
 		/*
 		 * Aiming our gun and firing
 		 */
-		Gun selectedGun = this.gunRack.firstElement();
-		GunStats selectedGunStats = selectedGun.getStats(currentTarget());
-		GunStats curGunStats = null;
 		if (hasTarget()){
 			try {
+				Gun selectedGun = this.gunRack.firstElement();
 				for (Gun gun : this.gunRack) {
 					if(gun.isValid(currentTarget())) {
 						gun.feedTarget(currentTarget());
-						curGunStats = gun.getStats(currentTarget());
-						if (compareGunStats(curGunStats, selectedGunStats) > 0)
+						if (compareGunStats(gun, selectedGun) > 0)
 						{
 							selectedGun = gun;
-							selectedGunStats = curGunStats;
 						}
 					}
 				}
@@ -346,21 +344,44 @@ public class Starter extends AdvancedRobot {
 		}
 		for (Gun gun : this.gunRack) {
 			gun.update();
-			GunStats stats = gun.getStats();
-			this.out.print(gun.getClass().toString() + ": ");
-			this.out.println(stats.toString());
+			if(hasTarget()){
+				GunStats stats = gun.getStats(currentTarget());
+				this.out.print(gun.getClass().toString() + ": ");
+				this.out.println(stats.toString() + " for " + currentTarget().getName());
+			}else{
+				GunStats stats = gun.getStats();
+				this.out.print(gun.getClass().toString() + ": ");
+				this.out.println(stats.toString());
+
+			}
 		}
 	}
 
-	private int compareGunStats(GunStats gunStats1, GunStats gunStats2) {
-		int results = gunStats1.getShots()==0?1:0; // give 1 a chance
-		if (1 > results) {
+	private int compareGunStats(Gun gun1, Gun gun2) {
+		GunStats gunStats1 = gun1.getStats(currentTarget());
+		GunStats gunStats2 = gun2.getStats(currentTarget());
+		// these two checks allow the gun to get some time in after initial firings.
+		int results = (gun1.lastFired() + GUN_FIRE_THRESHOLD > getTime())?1:0;
+		if (0 == results) {
+			results = (gun2.lastFired() + GUN_FIRE_THRESHOLD > getTime())?-1:0;
+		}
+
+		// give each gun a chance to fire at least once per target
+		if (0 == results) {
+			results = gunStats1.getShots()==0?1:0; // give 1 a chance
+		}
+		if (0 == results) {
 			results = gunStats2.getShots()==0?-1:0; // give 2 a chance
 		}
-		double averageDiff = gunStats1.getAverage() - gunStats2.getAverage();
-		if (0 == results && Math.abs(averageDiff)> 0.001) { // both have had chances, which is better?
+
+		// don't let low stats prevent an overall good gun from having a chance.
+		double average1 = Math.max(gunStats1.getAverage(), gun1.getStats().getAverage()/2);
+		double average2 = Math.max(gunStats2.getAverage(), gun2.getStats().getAverage()/2);
+		double averageDiff = average1 - average2;
+		if (0 == results && Math.abs(averageDiff)> 0.01) { // both have had chances, which is better?
 			results = averageDiff>0?1:-1;
 		}
+		// if this is still 0 the guns are close enough to be equal
 
 		return results;
 	}
@@ -467,6 +488,16 @@ public class Starter extends AdvancedRobot {
 			g.setColor(Color.white);
 			g.drawLine((int)origin.getX(), (int)origin.getY(), (int)tempPoint.getX(), (int)tempPoint.getY());
 
+		}
+
+		if (PAINT_CURRENT_TARGET) {
+			if (hasTarget()) {
+				int botWidth = (int)getWidth();
+				int botHalfWidth = botWidth/2;
+				g.setColor(Color.yellow);
+				Point targetPoint = BotTools.convertToPoint(this, currentTarget());
+				g.drawRect((int)targetPoint.getX()-botHalfWidth, (int)targetPoint.getY()-botHalfWidth, botWidth, botWidth);
+			}
 		}
 	}
 
