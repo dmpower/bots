@@ -127,7 +127,7 @@ public class Starter extends AdvancedRobot {
 	 */
 	@Override
 	public void onRobotDeath(RobotDeathEvent event) {
-		if (currentTarget().getName().equals(event.getName())){
+		if (hasTarget() && currentTarget().getName().equals(event.getName())){
 			clearTarget();
 		}
 		this.targetManager.removeGroup(new TargetBot(event));
