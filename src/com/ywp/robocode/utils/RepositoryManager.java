@@ -62,7 +62,7 @@ public class RepositoryManager <E> {
 			}
 			//			System.out.println(this.getClass().getName() + " : updating entry. queue size: " + tempList.size());
 
-		}
+		} else { System.out.println(this.getClass().getName() + " - Dropping: " + newEntry.getUniqueId() + " as it already exists."); }
 	}
 
 	public void clear() {
