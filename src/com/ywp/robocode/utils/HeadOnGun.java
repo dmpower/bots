@@ -48,19 +48,14 @@ public class HeadOnGun implements Gun {
 	@Override
 	public double aimRadians(TargetBot target) {
 		feedTarget(target);
-		double targetAngle = aimRadians(target.getPoint());
+		double targetAngle = HeadOnGun.aimRadians(this.owningBot, target.getPoint());
 		this.owningBot.setTurnGunRightRadians(targetAngle);
 		return targetAngle;
 	}
 
-	/**
-	 * Aim head on to a point
-	 * @param targetPoint - aim at this point
-	 * @return - the radians adjustment to turn the gun to aim at the point
-	 */
-	public double aimRadians(Point targetPoint) {
-		double absBearing = BotTools.convertToPoint(this.owningBot).angleRadians(targetPoint);
-		double targetAngle = Utils.normalRelativeAngle(absBearing-this.owningBot.getGunHeadingRadians());
+	public static double aimRadians (AdvancedRobot theBot, Point targetPoint) {
+		double absBearing = BotTools.convertToPoint(theBot).angleRadians(targetPoint);
+		double targetAngle = Utils.normalRelativeAngle(absBearing-theBot.getGunHeadingRadians());
 		return targetAngle;
 	}
 
@@ -77,8 +72,8 @@ public class HeadOnGun implements Gun {
 	 * @param targetPoint - aim at this point
 	 * @return - the degrees adjustment to turn the gun to aim at the point
 	 */
-	public double aim(Point targetPoint) {
-		return Utils.normalRelativeAngleDegrees(Math.toDegrees(aimRadians(targetPoint)));
+	public static double aim(AdvancedRobot theBot, Point targetPoint) {
+		return Utils.normalRelativeAngleDegrees(Math.toDegrees(HeadOnGun.aimRadians(theBot, targetPoint)));
 	}
 
 	/* (non-Javadoc)
