@@ -141,7 +141,7 @@ public class HeadOnGun implements Gun {
 	 */
 	@Override
 	public boolean isActive() {
-		return true;
+		return false;
 	}
 
 	/* (non-Javadoc)
