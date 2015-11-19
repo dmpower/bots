@@ -53,6 +53,12 @@ public class HeadOnGun implements Gun {
 		return targetAngle;
 	}
 
+	/**
+	 * Aim head on to a point
+	 * @param theBot that needs to do the aiming
+	 * @param targetPoint - aim at this point
+	 * @return - the radians adjustment to turn the gun to aim at the point
+	 */
 	public static double aimRadians (AdvancedRobot theBot, Point targetPoint) {
 		double absBearing = BotTools.convertToPoint(theBot).angleRadians(targetPoint);
 		double targetAngle = Utils.normalRelativeAngle(absBearing-theBot.getGunHeadingRadians());
@@ -69,6 +75,7 @@ public class HeadOnGun implements Gun {
 
 	/**
 	 * Aim head on to a point
+	 * @param theBot that needs to do the aiming
 	 * @param targetPoint - aim at this point
 	 * @return - the degrees adjustment to turn the gun to aim at the point
 	 */
