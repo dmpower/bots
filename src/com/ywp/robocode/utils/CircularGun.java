@@ -252,8 +252,7 @@ public class CircularGun implements Gun {
 	public void onPaint(Graphics2D g) {
 
 		if(null != this.aimPoint){
-			g.setColor(Color.blue);
-			g.fillOval((int)this.aimPoint.getX()-(TARGET_POINT_SIZE/2),(int)this.aimPoint.getY()-(TARGET_POINT_SIZE/2),TARGET_POINT_SIZE,TARGET_POINT_SIZE);
+			this.aimPoint.drawPoint(g, Color.blue);
 
 			Point origin = BotTools.convertToPoint(this.owningBot);
 			double absBearing = origin.angleRadians(this.aimPoint);// this is proven accurate
