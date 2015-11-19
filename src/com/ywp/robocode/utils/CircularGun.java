@@ -100,8 +100,7 @@ public class CircularGun implements Gun {
 			}
 		}
 
-		absBearing = origin.angleRadians(this.aimPoint);// this is proven accurate
-		double firingAdjustment = Utils.normalRelativeAngle(absBearing-this.owningBot.getGunHeadingRadians());
+		double firingAdjustment = HeadOnGun.aimRadians(owningBot, aimPoint);
 		this.owningBot.setTurnGunRightRadians(firingAdjustment);
 		return firingAdjustment;
 	}
