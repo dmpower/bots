@@ -19,6 +19,9 @@ import robocode.util.Utils;
 /**
  * @author dpower
  *
+ *         This gun does Head on Targeting with no adjustments. The public
+ *         static methods are meant to be used with other guns. They are not
+ *         part of the Gun interface on purpose. See CircularGun for an example.
  */
 public class HeadOnGun implements Gun {
 
@@ -58,7 +61,8 @@ public class HeadOnGun implements Gun {
 	}
 
 	/**
-	 * Aim head on to a point
+	 * Aim head on to a point. It is intentional this method is not part of the
+	 * gun interface
 	 *
 	 * @param theBot
 	 *            that needs to do the aiming
@@ -82,7 +86,8 @@ public class HeadOnGun implements Gun {
 	}
 
 	/**
-	 * Aim head on to a point
+	 * Aim head on to a point. It is intentional this method is not part of the
+	 * gun interface
 	 *
 	 * @param theBot
 	 *            that needs to do the aiming
@@ -139,7 +144,7 @@ public class HeadOnGun implements Gun {
 						HeadOnGun.stats.get(target.getKey()).addHit();
 					}
 					this.owningBot.out.println(this.getClass().getName() + " - time: " + this.owningBot.getTime()
-					+ " target: " + target.getKey() + " Bullet: " + bullet.toString());
+							+ " target: " + target.getKey() + " Bullet: " + bullet.toString());
 					// target.getValue().remove(bullet); // this does not work
 				}
 			}

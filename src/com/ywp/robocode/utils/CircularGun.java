@@ -20,6 +20,11 @@ import robocode.util.Utils;
 
 /**
  * @author dpower
+ * 
+ *         This gun uses circular tracking to aim the gun head on to the
+ *         predicted position where the target bot and the bullet will collide.
+ *         It makes use of the static methods of HeadOnGun to find the final gun
+ *         adjustment.
  *
  */
 public class CircularGun implements Gun {
@@ -163,7 +168,7 @@ public class CircularGun implements Gun {
 					expired.addElement(bulletData);
 					if (!CircularGun.stats.containsKey(targetGroupId)) {
 						this.owningBot.out
-						.println(this.getClass().getName() + " - new gun stats in update for " + targetGroupId);
+								.println(this.getClass().getName() + " - new gun stats in update for " + targetGroupId);
 						CircularGun.stats.put(targetGroupId, new GunStats());
 					}
 					if (targetGroupId.equals(bullet.getVictim())) {
@@ -171,7 +176,7 @@ public class CircularGun implements Gun {
 						CircularGun.stats.get(targetGroupId).addHit();
 					}
 					this.owningBot.out.println(this.getClass().getName() + " - time: " + this.owningBot.getTime()
-					+ " target: " + targetGroupId + " Bullet: " + bullet.toString());
+							+ " target: " + targetGroupId + " Bullet: " + bullet.toString());
 				}
 			}
 		}
