@@ -6,7 +6,7 @@ import robocode.RobotDeathEvent;
 import robocode.ScannedRobotEvent;
 import robocode.util.Utils;
 
-public class TargetBot implements RepositoryEntry<TargetBot>{
+public class TargetBot implements RepositoryEntry<TargetBot> {
 	private final String name;
 	private final double energy;
 	private final double heading;
@@ -14,44 +14,44 @@ public class TargetBot implements RepositoryEntry<TargetBot>{
 	private final double absBearing;
 	private final double distance;
 	private final double velocity;
-	private final long   time;
-	private final Point  origin;
+	private final long	 time;
+	private final Point	 origin;
 
-	public TargetBot(AdvancedRobot source, ScannedRobotEvent event){
-		this.name       = event.getName();
-		this.energy     = event.getEnergy();
-		this.heading    = event.getHeadingRadians();
-		this.bearing    = event.getBearingRadians();
-		this.absBearing = Utils.normalAbsoluteAngle(event.getBearingRadians()+source.getHeadingRadians());
-		this.distance   = event.getDistance();
-		this.velocity   = event.getVelocity();
-		this.time       = event.getTime();
-		this.origin     = BotTools.convertToPoint(source);
+	public TargetBot(AdvancedRobot source, ScannedRobotEvent event) {
+		this.name = event.getName();
+		this.energy = event.getEnergy();
+		this.heading = event.getHeadingRadians();
+		this.bearing = event.getBearingRadians();
+		this.absBearing = Utils.normalAbsoluteAngle(event.getBearingRadians() + source.getHeadingRadians());
+		this.distance = event.getDistance();
+		this.velocity = event.getVelocity();
+		this.time = event.getTime();
+		this.origin = BotTools.convertToPoint(source);
 	}
 
-	public TargetBot(AdvancedRobot source, HitRobotEvent event, double botWidth){
-		this.name       = event.getName();
-		this.energy     = event.getEnergy();
-		this.heading    = 0d;
-		this.bearing    = event.getBearingRadians();
-		this.absBearing = Utils.normalAbsoluteAngle(event.getBearingRadians()+source.getHeadingRadians());
+	public TargetBot(AdvancedRobot source, HitRobotEvent event, double botWidth) {
+		this.name = event.getName();
+		this.energy = event.getEnergy();
+		this.heading = 0d;
+		this.bearing = event.getBearingRadians();
+		this.absBearing = Utils.normalAbsoluteAngle(event.getBearingRadians() + source.getHeadingRadians());
 		// This is not entirely accurate, but it helps
-		this.distance   = botWidth;
-		this.velocity   = 0d;
-		this.time       = event.getTime();
-		this.origin     = BotTools.convertToPoint(source);
+		this.distance = botWidth;
+		this.velocity = 0d;
+		this.time = event.getTime();
+		this.origin = BotTools.convertToPoint(source);
 	}
 
-	public TargetBot(AdvancedRobot source, RobotDeathEvent event){
-		this.name       = event.getName();
-		this.energy     = 0d;
-		this.heading    = 0d;
-		this.bearing    = 0d;
+	public TargetBot(AdvancedRobot source, RobotDeathEvent event) {
+		this.name = event.getName();
+		this.energy = 0d;
+		this.heading = 0d;
+		this.bearing = 0d;
 		this.absBearing = 0d;
-		this.distance   = 0d;
-		this.velocity   = 0d;
-		this.time       = event.getTime();
-		this.origin     = BotTools.convertToPoint(source);
+		this.distance = 0d;
+		this.velocity = 0d;
+		this.time = event.getTime();
+		this.origin = BotTools.convertToPoint(source);
 	}
 
 	/**
@@ -75,8 +75,8 @@ public class TargetBot implements RepositoryEntry<TargetBot>{
 	}
 
 	/**
-	 * Returns the absolute bearing to the robot you scanned, relative to your robot's
-	 * heading, in degrees (0 <= getBearing() < 360)
+	 * Returns the absolute bearing to the robot you scanned, relative to your
+	 * robot's heading, in degrees (0 <= getBearing() < 360)
 	 *
 	 * @return the bearing to the robot you scanned, in degrees
 	 */
@@ -170,7 +170,8 @@ public class TargetBot implements RepositoryEntry<TargetBot>{
 		return BotTools.project(this.origin, this.distance, this.absBearing);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see com.ywp.robocode.utils.RepositoryEntry#getGroupId()
 	 */
 	@Override
@@ -178,7 +179,8 @@ public class TargetBot implements RepositoryEntry<TargetBot>{
 		return this.name;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see com.ywp.robocode.utils.RepositoryEntry#getUniqueId()
 	 */
 	@Override
@@ -186,13 +188,13 @@ public class TargetBot implements RepositoryEntry<TargetBot>{
 		return this.name + this.time;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see com.ywp.robocode.utils.RepositoryEntry#getData()
 	 */
 	@Override
 	public TargetBot getData() {
 		return this;
 	}
-
 
 }

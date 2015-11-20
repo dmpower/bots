@@ -4,18 +4,21 @@ import robocode.Bullet;
 
 public class BulletData implements RepositoryEntry<BulletData> {
 
-	private Bullet bullet;
+	private Bullet	  bullet;
 
 	private TargetBot target;
 
-	private Point origin;
+	private Point	  origin;
 
 	/**
 	 * Main constructor
 	 *
-	 * @param bullet - the bullet to be tracked
-	 * @param target - the target for the bullet
-	 * @param origin - the point where the bullet was originally fired from
+	 * @param bullet
+	 *            - the bullet to be tracked
+	 * @param target
+	 *            - the target for the bullet
+	 * @param origin
+	 *            - the point where the bullet was originally fired from
 	 */
 	public BulletData(Bullet bullet, TargetBot target, Point origin) {
 		this.bullet = bullet;

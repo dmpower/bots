@@ -8,17 +8,16 @@ package com.ywp.robocode.utils;
  *
  */
 public class GunStats {
-	private int shots;
-	private int hits;
+	private int	shots;
+	private int	hits;
 
 	public GunStats() {
-		this(0,0);
+		this(0, 0);
 	}
 
-	public GunStats(int shots, int hits)
-	{
+	public GunStats(int shots, int hits) {
 		this.shots = shots;
-		this.hits  = hits;
+		this.hits = hits;
 	}
 
 	public int getShots() {
@@ -30,22 +29,23 @@ public class GunStats {
 	}
 
 	public double getAverage() {
-		return (this.shots == 0) ? 0 : ((double)this.hits)/this.shots;
+		return (this.shots == 0) ? 0 : ((double) this.hits) / this.shots;
 	}
 
-	public void addShot(){
+	public void addShot() {
 		this.shots++;
 	}
 
-	public void addHit(){
+	public void addHit() {
 		this.hits++;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
-	public String toString(){
+	public String toString() {
 		return "Hits: " + this.hits + " Shots: " + this.shots + " Avg: " + getAverage();
 	}
 

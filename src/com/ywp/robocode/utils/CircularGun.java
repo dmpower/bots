@@ -24,21 +24,21 @@ import robocode.util.Utils;
  */
 public class CircularGun implements Gun {
 
-	private TargetBot lastTarget = null;
+	private TargetBot					  lastTarget		= null;
 
-	private RepositoryManager<TargetBot> targetRepository;
-	private AdvancedRobot owningBot;
-	private RepositoryManager<BulletData> bullets = new RepositoryManager<>();
-	private static Map<String,GunStats> stats = new HashMap<>();
-	private double ray;
-	private static final int TARGET_POINT_SIZE = 8;
-	private static final double CALULATION_BUFFER = 0.001;
-	private long lastFired = 0;
-	private Rectangle2D.Double battleField;
-	private double botSize;
-	private double botHalfSize;
+	private RepositoryManager<TargetBot>  targetRepository;
+	private AdvancedRobot				  owningBot;
+	private RepositoryManager<BulletData> bullets			= new RepositoryManager<>();
+	private static Map<String, GunStats>  stats				= new HashMap<>();
+	private double						  ray;
+	private static final int			  TARGET_POINT_SIZE	= 8;
+	private static final double			  CALULATION_BUFFER	= 0.001;
+	private long						  lastFired			= 0;
+	private Rectangle2D.Double			  battleField;
+	private double						  botSize;
+	private double						  botHalfSize;
 
-	private Point aimPoint;
+	private Point						  aimPoint;
 
 	/**
 	 * @param targetRepository
@@ -49,16 +49,18 @@ public class CircularGun implements Gun {
 		this.owningBot = owningBot;
 		this.ray = this.owningBot.getBattleFieldHeight() + this.owningBot.getBattleFieldWidth();
 		this.botSize = this.owningBot.getWidth();
-		this.botHalfSize = this.botSize/2;
-		this.battleField =
-				new Rectangle2D.Double(this.botHalfSize-CALULATION_BUFFER, this.botHalfSize-CALULATION_BUFFER,
-						this.owningBot.getBattleFieldWidth()-this.botSize+(CALULATION_BUFFER*2),
-						this.owningBot.getBattleFieldHeight()-this.botSize+(CALULATION_BUFFER*2));
+		this.botHalfSize = this.botSize / 2;
+		this.battleField = new Rectangle2D.Double(this.botHalfSize - CALULATION_BUFFER,
+				this.botHalfSize - CALULATION_BUFFER,
+				this.owningBot.getBattleFieldWidth() - this.botSize + (CALULATION_BUFFER * 2),
+				this.owningBot.getBattleFieldHeight() - this.botSize + (CALULATION_BUFFER * 2));
 
 	}
 
-	/* (non-Javadoc)
-	 * @see com.ywp.robocode.utils.Gun#feedTarget(com.ywp.robocode.utils.TargetBot)
+	/*
+	 * (non-Javadoc)
+	 * @see
+	 * com.ywp.robocode.utils.Gun#feedTarget(com.ywp.robocode.utils.TargetBot)
 	 */
 	@Override
 	public void feedTarget(TargetBot target) {
@@ -66,12 +68,14 @@ public class CircularGun implements Gun {
 		this.lastTarget = target;
 	}
 
-	/* (non-Javadoc)
-	 * @see com.ywp.robocode.utils.Gun#aimRadians(com.ywp.robocode.utils.TargetBot)
+	/*
+	 * (non-Javadoc)
+	 * @see
+	 * com.ywp.robocode.utils.Gun#aimRadians(com.ywp.robocode.utils.TargetBot)
 	 */
 	@Override
 	public double aimRadians(TargetBot target) throws IllegalStateException {
-		if (! isValid(target)) {
+		if (!isValid(target)) {
 			throw new IllegalStateException("Cannot aim an invalid gun. Please call isValid first.");
 		}
 		feedTarget(target);
@@ -85,27 +89,30 @@ public class CircularGun implements Gun {
 		double turnRate = targetEntry1.getHeadingRadians() - targetEntry2.getHeadingRadians();
 		double speed = targetEntry1.getVelocity();
 		double predictedHeading = targetEntry1.getHeadingRadians();
-		double absBearing=targetEntry1.getBearingRadians()+this.owningBot.getHeadingRadians();
+		double absBearing = targetEntry1.getBearingRadians() + this.owningBot.getHeadingRadians();
 		Point origin = BotTools.convertToPoint(this.owningBot);
 		this.aimPoint = BotTools.project(origin, targetEntry1.getDistance(), absBearing);
 
 		double timeDelta = 0;
-		while ( (timeDelta++) * bulletSpeed < origin.distance(this.aimPoint) ){
+		while ((timeDelta++) * bulletSpeed < origin.distance(this.aimPoint)) {
 			this.aimPoint = BotTools.project(this.aimPoint, speed, predictedHeading);
 			predictedHeading += turnRate;
-			if (! this.battleField.contains(this.aimPoint)) {
-				this.aimPoint.x = Math.max(this.botHalfSize, Math.min(this.owningBot.getBattleFieldWidth()-this.botHalfSize, this.aimPoint.getX()));
-				this.aimPoint.y = Math.max(this.botHalfSize, Math.min(this.owningBot.getBattleFieldHeight()-this.botHalfSize, this.aimPoint.getY()));
+			if (!this.battleField.contains(this.aimPoint)) {
+				this.aimPoint.x = Math.max(this.botHalfSize,
+						Math.min(this.owningBot.getBattleFieldWidth() - this.botHalfSize, this.aimPoint.getX()));
+				this.aimPoint.y = Math.max(this.botHalfSize,
+						Math.min(this.owningBot.getBattleFieldHeight() - this.botHalfSize, this.aimPoint.getY()));
 				break; // hit wall we are done
 			}
 		}
 
-		double firingAdjustment = HeadOnGun.aimRadians(owningBot, aimPoint);
+		double firingAdjustment = HeadOnGun.aimRadians(this.owningBot, this.aimPoint);
 		this.owningBot.setTurnGunRightRadians(firingAdjustment);
 		return firingAdjustment;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see com.ywp.robocode.utils.Gun#aim(com.ywp.robocode.utils.TargetBot)
 	 */
 	@Override
@@ -113,7 +120,8 @@ public class CircularGun implements Gun {
 		return Utils.normalRelativeAngleDegrees(Math.toDegrees(aimRadians(target)));
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see com.ywp.robocode.utils.Gun#fire()
 	 */
 	@Override
@@ -121,16 +129,18 @@ public class CircularGun implements Gun {
 		// TODO Auto-generated method stub
 		double bulletPower = getPower(this.lastTarget);
 		boolean results = false;
-		if(this.owningBot.getGunHeat() == 0 && this.owningBot.getGunTurnRemainingRadians() < (GUN_TURN_THRESHOLD)){
+		if (this.owningBot.getGunHeat() == 0 && this.owningBot.getGunTurnRemainingRadians() < (GUN_TURN_THRESHOLD)) {
 			Bullet theBullet = this.owningBot.setFireBullet(bulletPower);
-			if(null != theBullet) { // only log an entry if we succeeded to fire
-				BulletData newEntry = new BulletData(theBullet, this.lastTarget, BotTools.convertToPoint(this.owningBot));
+			if (null != theBullet) { // only log an entry if we succeeded to
+				// fire
+				BulletData newEntry = new BulletData(theBullet, this.lastTarget,
+						BotTools.convertToPoint(this.owningBot));
 				this.bullets.add(newEntry);
 				results = true;
 				this.lastFired = this.owningBot.getTime();
-				if(!CircularGun.stats.containsKey(this.lastTarget.getGroupId()))
-				{
-					this.owningBot.out.println(this.getClass().getName() + " - new gun stats in fire for " + this.lastTarget.getName());
+				if (!CircularGun.stats.containsKey(this.lastTarget.getGroupId())) {
+					this.owningBot.out.println(
+							this.getClass().getName() + " - new gun stats in fire for " + this.lastTarget.getName());
 					CircularGun.stats.put(this.lastTarget.getGroupId(), new GunStats());
 				}
 				CircularGun.stats.get(this.lastTarget.getGroupId()).addShot();
@@ -139,7 +149,8 @@ public class CircularGun implements Gun {
 		return results;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see com.ywp.robocode.utils.Gun#update()
 	 */
 	@Override
@@ -148,18 +159,19 @@ public class CircularGun implements Gun {
 		for (String targetGroupId : this.bullets.getAllGroupIds()) {
 			for (BulletData bulletData : this.bullets.getAllData(targetGroupId)) {
 				Bullet bullet = bulletData.getBullet();
-				if(!bullet.isActive()){
+				if (!bullet.isActive()) {
 					expired.addElement(bulletData);
-					if(!CircularGun.stats.containsKey(targetGroupId))
-					{
-						this.owningBot.out.println(this.getClass().getName() + " - new gun stats in update for " + targetGroupId);
+					if (!CircularGun.stats.containsKey(targetGroupId)) {
+						this.owningBot.out
+						.println(this.getClass().getName() + " - new gun stats in update for " + targetGroupId);
 						CircularGun.stats.put(targetGroupId, new GunStats());
 					}
-					if (targetGroupId.equals(bullet.getVictim())){
+					if (targetGroupId.equals(bullet.getVictim())) {
 						// basically if I hit my intended target, add a hit
 						CircularGun.stats.get(targetGroupId).addHit();
 					}
-					this.owningBot.out.println(this.getClass().getName() + " - time: " + this.owningBot.getTime() + " target: " + targetGroupId + " Bullet: " + bullet.toString());
+					this.owningBot.out.println(this.getClass().getName() + " - time: " + this.owningBot.getTime()
+					+ " target: " + targetGroupId + " Bullet: " + bullet.toString());
 				}
 			}
 		}
@@ -167,7 +179,8 @@ public class CircularGun implements Gun {
 		this.bullets.remove(expired);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see com.ywp.robocode.utils.Gun#update(robocode.BulletHitEvent)
 	 */
 	@Override
@@ -176,40 +189,42 @@ public class CircularGun implements Gun {
 		// do nothing?
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see com.ywp.robocode.utils.Gun#isValid(com.ywp.robocode.utils.TargetBot)
 	 */
 	@Override
 	public boolean isValid(TargetBot target) {
 		boolean results = isActive();
-		if(results) {
+		if (results) {
 			Vector<TargetBot> targetData = this.targetRepository.getAllData(target);
 			results = targetData.size() > 1;
-			if(results) {
-				results = (targetData.get(0).getTime()-targetData.get(1).getTime()) == 1;
+			if (results) {
+				results = (targetData.get(0).getTime() - targetData.get(1).getTime()) == 1;
 			}
-			if(results) {
-				results = (targetData.get(1).getTime()-targetData.get(2).getTime()) == 1;
+			if (results) {
+				results = (targetData.get(1).getTime() - targetData.get(2).getTime()) == 1;
 			}
-			if(results) {
+			if (results) {
 				double speedDelta1 = targetData.get(0).getVelocity() - targetData.get(1).getVelocity();
 				double speedDelta2 = targetData.get(1).getVelocity() - targetData.get(2).getVelocity();
 				results = speedDelta1 == speedDelta2;
 			}
-			if(results) {
+			if (results) {
 				double turnDelta1 = targetData.get(0).getHeadingRadians() - targetData.get(1).getHeadingRadians();
 				double turnDelta2 = targetData.get(1).getHeadingRadians() - targetData.get(2).getHeadingRadians();
 				results = turnDelta1 == turnDelta2;
 			}
 		}
 
-		if (! results) {
+		if (!results) {
 			this.aimPoint = null;
 		}
 		return results;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see com.ywp.robocode.utils.Gun#isActive()
 	 */
 	@Override
@@ -218,7 +233,8 @@ public class CircularGun implements Gun {
 		return true;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see com.ywp.robocode.utils.Gun#getStats()
 	 */
 	@Override
@@ -232,42 +248,48 @@ public class CircularGun implements Gun {
 		return new GunStats(shotTotal, hitTotal);
 	}
 
-	/* (non-Javadoc)
-	 * @see com.ywp.robocode.utils.Gun#getStats(com.ywp.robocode.utils.TargetBot)
+	/*
+	 * (non-Javadoc)
+	 * @see
+	 * com.ywp.robocode.utils.Gun#getStats(com.ywp.robocode.utils.TargetBot)
 	 */
 	@Override
 	public GunStats getStats(TargetBot target) {
 		GunStats results = CircularGun.stats.get(target.getName());
-		if(null == results){
+		if (null == results) {
 			results = new GunStats();
 		}
 		return results;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see com.ywp.robocode.utils.Gun#onPaint(java.awt.Graphics2D)
 	 */
 	@Override
 	public void onPaint(Graphics2D g) {
 
-		if(null != this.aimPoint){
+		if (null != this.aimPoint) {
 			this.aimPoint.drawPoint(g, Color.blue);
 
 			Point origin = BotTools.convertToPoint(this.owningBot);
-			double absBearing = origin.angleRadians(this.aimPoint);// this is proven accurate
+			double absBearing = origin.angleRadians(this.aimPoint);// this is
+			// proven
+			// accurate
 			Point tempPoint = BotTools.project(origin, this.ray, absBearing);
 			g.setColor(Color.green);
-			g.drawLine((int)origin.getX(), (int)origin.getY(), (int)tempPoint.getX(), (int)tempPoint.getY());
+			g.drawLine((int) origin.getX(), (int) origin.getY(), (int) tempPoint.getX(), (int) tempPoint.getY());
 		}
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see com.ywp.robocode.utils.Gun#printAllStats(java.io.PrintStream)
 	 */
 	@Override
 	public void printAllStats(PrintStream out) {
 		out.println(this.getClass().getName() + " - collected stats");
-		for ( Entry<String, GunStats> curEntry : CircularGun.stats.entrySet()) {
+		for (Entry<String, GunStats> curEntry : CircularGun.stats.entrySet()) {
 			out.print(curEntry.getKey() + " - ");
 			out.println(curEntry.getValue().toString());
 		}
@@ -275,16 +297,16 @@ public class CircularGun implements Gun {
 	}
 
 	private double getPower(TargetBot target) {
-		return Math.min(2.4,Math.min(target.getEnergy()/4,this.owningBot.getEnergy()/10));
+		return Math.min(2.4, Math.min(target.getEnergy() / 4, this.owningBot.getEnergy() / 10));
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * @see com.ywp.robocode.utils.Gun#lastFired()
 	 */
 	@Override
 	public long lastFired() {
 		return this.lastFired;
 	}
-
 
 }
