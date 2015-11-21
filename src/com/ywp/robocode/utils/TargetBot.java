@@ -11,10 +11,9 @@ public class TargetBot implements RepositoryEntry<TargetBot> {
 	private final double energy;
 	private final double heading;
 	private final double bearing;
-	private final double absBearing;
-	private final double distance;
 	private final double velocity;
 	private final long	 time;
+	private final Point	 point;
 	private final Point	 origin;
 
 	public TargetBot(AdvancedRobot source, ScannedRobotEvent event) {
@@ -22,10 +21,10 @@ public class TargetBot implements RepositoryEntry<TargetBot> {
 		this.energy = event.getEnergy();
 		this.heading = event.getHeadingRadians();
 		this.bearing = event.getBearingRadians();
-		this.absBearing = Utils.normalAbsoluteAngle(event.getBearingRadians() + source.getHeadingRadians());
-		this.distance = event.getDistance();
 		this.velocity = event.getVelocity();
 		this.time = event.getTime();
+		this.point = BotTools.project(this.origin, event.getDistance(),
+				(event.getBearingRadians() + source.getHeadingRadians()));
 		this.origin = BotTools.convertToPoint(source);
 	}
 
@@ -34,11 +33,11 @@ public class TargetBot implements RepositoryEntry<TargetBot> {
 		this.energy = event.getEnergy();
 		this.heading = 0d;
 		this.bearing = event.getBearingRadians();
-		this.absBearing = Utils.normalAbsoluteAngle(event.getBearingRadians() + source.getHeadingRadians());
-		// This is not entirely accurate, but it helps
-		this.distance = botWidth;
 		this.velocity = 0d;
 		this.time = event.getTime();
+		// This is not entirely accurate, but it helps
+		this.point = BotTools.project(this.origin, source.getWidth(),
+				(event.getBearingRadians() + source.getHeadingRadians()));
 		this.origin = BotTools.convertToPoint(source);
 	}
 
@@ -47,17 +46,15 @@ public class TargetBot implements RepositoryEntry<TargetBot> {
 		this.energy = 0d;
 		this.heading = 0d;
 		this.bearing = 0d;
-		this.absBearing = 0d;
-		this.distance = 0d;
 		this.velocity = 0d;
 		this.time = event.getTime();
+		this.point = new Point(0, 0);
 		this.origin = BotTools.convertToPoint(source);
 	}
 
 	/**
 	 * Returns the bearing to the robot you scanned, relative to your robot's
 	 * heading, in degrees (-180 <= getBearing() < 180)
-	 *
 	 * @return the bearing to the robot you scanned, in degrees
 	 */
 	public double getBearing() {
@@ -67,7 +64,6 @@ public class TargetBot implements RepositoryEntry<TargetBot> {
 	/**
 	 * Returns the bearing to the robot you scanned, relative to your robot's
 	 * heading, in radians (-PI <= getBearingRadians() < PI)
-	 *
 	 * @return the bearing to the robot you scanned, in radians
 	 */
 	public double getBearingRadians() {
@@ -77,35 +73,41 @@ public class TargetBot implements RepositoryEntry<TargetBot> {
 	/**
 	 * Returns the absolute bearing to the robot you scanned, relative to your
 	 * robot's heading, in degrees (0 <= getBearing() < 360)
-	 *
 	 * @return the bearing to the robot you scanned, in degrees
 	 */
 	public double getAbsBearing() {
-		return Utils.normalAbsoluteAngleDegrees(Math.toDegrees(this.absBearing));
+		return Utils.normalAbsoluteAngleDegrees(Math.toDegrees(getAbsBearingRadians()));
 	}
 
 	/**
 	 * Returns the bearing to the robot you scanned, relative to your robot's
 	 * heading, in radians (0 <= getBearingRadians() < 2*PI)
-	 *
 	 * @return the bearing to the robot you scanned, in radians
 	 */
 	public double getAbsBearingRadians() {
-		return this.absBearing;
+		return this.origin.angleRadians(this.point);
 	}
 
 	/**
-	 * Returns the distance to the robot (your center to his center).
-	 *
-	 * @return the distance to the robot.
+	 * Returns the distance from source to target. Note: this number is
+	 * recalculated so it will not equal the distance from the event.
+	 * @return the distance from source to target.
 	 */
 	public double getDistance() {
-		return this.distance;
+		return this.origin.distance(this.point);
+	}
+
+	/**
+	 * Returns the distance from the provided source to the target.
+	 * @param source the point to calculate the distance from
+	 * @return the distance from the provided source to the target.
+	 */
+	public double getDistance(Point source) {
+		return source.distance(this.point);
 	}
 
 	/**
 	 * Returns the energy of the robot.
-	 *
 	 * @return the energy of the robot
 	 */
 	public double getEnergy() {
@@ -114,7 +116,6 @@ public class TargetBot implements RepositoryEntry<TargetBot> {
 
 	/**
 	 * Returns the heading of the robot, in degrees (0 <= getHeading() < 360)
-	 *
 	 * @return the heading of the robot, in degrees
 	 */
 	public double getHeading() {
@@ -123,7 +124,6 @@ public class TargetBot implements RepositoryEntry<TargetBot> {
 
 	/**
 	 * Returns the heading of the robot, in radians (0 <= getHeading() < 2 * PI)
-	 *
 	 * @return the heading of the robot, in radians
 	 */
 	public double getHeadingRadians() {
@@ -132,7 +132,6 @@ public class TargetBot implements RepositoryEntry<TargetBot> {
 
 	/**
 	 * Returns the name of the robot.
-	 *
 	 * @return the name of the robot
 	 */
 	public String getName() {
@@ -141,7 +140,6 @@ public class TargetBot implements RepositoryEntry<TargetBot> {
 
 	/**
 	 * Returns the velocity of the robot.
-	 *
 	 * @return the velocity of the robot
 	 */
 	public double getVelocity() {
@@ -150,7 +148,6 @@ public class TargetBot implements RepositoryEntry<TargetBot> {
 
 	/**
 	 * Returns the time the target was seen.
-	 *
 	 * @return the time the target was seen
 	 */
 	public long getTime() {
@@ -159,7 +156,6 @@ public class TargetBot implements RepositoryEntry<TargetBot> {
 
 	/**
 	 * Returns the origin when TargetBot was created
-	 *
 	 * @return the origin when TargetBot was created.
 	 */
 	public Point getOrigin() {
@@ -167,7 +163,7 @@ public class TargetBot implements RepositoryEntry<TargetBot> {
 	}
 
 	public Point getPoint() {
-		return BotTools.project(this.origin, this.distance, this.absBearing);
+		return this.point;
 	}
 
 	/*
