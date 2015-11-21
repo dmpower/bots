@@ -24,8 +24,7 @@ import robocode.util.Utils;
  */
 public class CircularGun implements Gun {
 
-	private static final int	TARGET_POINT_SIZE = 8;
-	private static final double	CALULATION_BUFFER = 0.001;
+	private static final double CALULATION_BUFFER = 0.001;
 
 	private RepositoryManager<TargetBot>  targetRepository;
 	private TargetBot					  lastTarget = null;
