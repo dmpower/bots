@@ -17,6 +17,10 @@ public class Point extends Point2D.Double {
 		super(x, y);
 	}
 
+	public Point(Point source) {
+		super(source.getX(), source.getY());
+	}
+
 	public double angleRadians(Point2D.Double to) {
 		return Utils.normalAbsoluteAngle(Math.atan2(to.getX() - getX(), to.getY() - getY()));
 	}
