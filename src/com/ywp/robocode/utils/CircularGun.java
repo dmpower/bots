@@ -1,6 +1,3 @@
-/**
- *
- */
 package com.ywp.robocode.utils;
 
 import java.awt.Color;
@@ -19,31 +16,30 @@ import robocode.Rules;
 import robocode.util.Utils;
 
 /**
+ * This gun uses circular tracking to aim the gun head on to the
+ * predicted position where the target bot and the bullet will collide.
+ * It makes use of the static methods of HeadOnGun to find the final gun
+ * adjustment.
  * @author dpower
- * 
- *         This gun uses circular tracking to aim the gun head on to the
- *         predicted position where the target bot and the bullet will collide.
- *         It makes use of the static methods of HeadOnGun to find the final gun
- *         adjustment.
- *
  */
 public class CircularGun implements Gun {
 
-	private TargetBot					  lastTarget		= null;
+	private static final int	TARGET_POINT_SIZE = 8;
+	private static final double	CALULATION_BUFFER = 0.001;
 
 	private RepositoryManager<TargetBot>  targetRepository;
-	private AdvancedRobot				  owningBot;
-	private RepositoryManager<BulletData> bullets			= new RepositoryManager<>();
-	private static Map<String, GunStats>  stats				= new HashMap<>();
-	private double						  ray;
-	private static final int			  TARGET_POINT_SIZE	= 8;
-	private static final double			  CALULATION_BUFFER	= 0.001;
-	private long						  lastFired			= 0;
-	private Rectangle2D.Double			  battleField;
-	private double						  botSize;
-	private double						  botHalfSize;
+	private TargetBot					  lastTarget = null;
+	private RepositoryManager<BulletData> bullets	 = new RepositoryManager<>();
+	private static Map<String, GunStats>  stats		 = new HashMap<>();
+	private long						  lastFired	 = 0;
 
-	private Point						  aimPoint;
+	private AdvancedRobot	   owningBot;
+	private double			   ray;
+	private Rectangle2D.Double battleField;
+	private double			   botSize;
+	private double			   botHalfSize;
+
+	private Point aimPoint;
 
 	/**
 	 * @param targetRepository

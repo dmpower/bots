@@ -1,6 +1,3 @@
-/**
- *
- */
 package com.ywp.robocode.utils;
 
 import java.awt.Color;
@@ -17,11 +14,10 @@ import robocode.BulletHitEvent;
 import robocode.util.Utils;
 
 /**
+ * This gun does Head on Targeting with no adjustments. The public
+ * static methods are meant to be used with other guns. They are not
+ * part of the Gun interface on purpose. See CircularGun for an example.
  * @author dpower
- *
- *         This gun does Head on Targeting with no adjustments. The public
- *         static methods are meant to be used with other guns. They are not
- *         part of the Gun interface on purpose. See CircularGun for an example.
  */
 public class HeadOnGun implements Gun {
 
@@ -63,7 +59,6 @@ public class HeadOnGun implements Gun {
 	/**
 	 * Aim head on to a point. It is intentional this method is not part of the
 	 * gun interface
-	 *
 	 * @param theBot
 	 *            that needs to do the aiming
 	 * @param targetPoint
@@ -88,7 +83,6 @@ public class HeadOnGun implements Gun {
 	/**
 	 * Aim head on to a point. It is intentional this method is not part of the
 	 * gun interface
-	 *
 	 * @param theBot
 	 *            that needs to do the aiming
 	 * @param targetPoint
