@@ -1,6 +1,3 @@
-/**
- *
- */
 package com.ywp.robocode.utils;
 
 import java.awt.Graphics2D;
@@ -12,16 +9,13 @@ import robocode.Rules;
 
 /**
  * @author dpower
- *
  */
 public class HeadOnSlicerGun implements Gun {
 
-	private final double  NUM_LENGTH_SEGMENTS		= 4d;
-	private final double  NUM_ARC_SEGMENTS			= 10d;				  // keep
-																		  // this
-																		  // even
-	private final double  ARC_WIDTH_FACTOR			= Rules.MAX_VELOCITY;
-	private final int	  FIRING_ADJUSTMENT_HISTORY	= 200;
+	private final double NUM_LENGTH_SEGMENTS;
+	private final double NUM_ARC_SEGMENTS;		    // keep this even
+	private final double ARC_WIDTH_FACTOR;
+	private final int	 FIRING_ADJUSTMENT_HISTORY;
 
 	private AdvancedRobot owningBot;
 	private double		  sliceLength;
@@ -30,6 +24,16 @@ public class HeadOnSlicerGun implements Gun {
 	private double		  halfArcAdjustment;
 
 	public HeadOnSlicerGun(AdvancedRobot owningBot) {
+		this(owningBot, 4, 10, Rules.MAX_VELOCITY, 200);
+	}
+
+	public HeadOnSlicerGun(AdvancedRobot owningBot, int numLengthSegments, int numArcSegments, double arcWidthFactor,
+			int firingAdjustmentHistory) {
+		this.NUM_LENGTH_SEGMENTS = numLengthSegments;
+		this.NUM_ARC_SEGMENTS = numArcSegments;
+		this.ARC_WIDTH_FACTOR = arcWidthFactor;
+		this.FIRING_ADJUSTMENT_HISTORY = firingAdjustmentHistory;
+
 		this.owningBot = owningBot;
 
 		// basically find out how far away two bots can get and keep the smaller
