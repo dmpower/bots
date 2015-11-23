@@ -94,6 +94,7 @@ public class Starter extends AdvancedRobot {
 
 		this.gunRack.add(new HeadOnGun(this));
 		this.gunRack.add(new CircularGun(this.targetManager, this));
+// this.gunRack.add(new HeadOnSlicerGun(this.targetManager, this));
 		resetTurn();
 	}
 
@@ -220,7 +221,7 @@ public class Starter extends AdvancedRobot {
 				// than the previous best option and is reachable.
 				if (rating < bestRating
 						&& new Rectangle2D.Double(50, 50, getBattleFieldWidth() - 100, getBattleFieldHeight() - 100)
-						.contains(movePoint)) {
+								.contains(movePoint)) {
 					bestRating = rating;
 					/*
 					 * These next three lines are a very codesize-efficient way
