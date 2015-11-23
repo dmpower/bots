@@ -8,12 +8,16 @@ import robocode.BulletHitEvent;
 import robocode.Rules;
 
 /**
+ * This gun is similar to the HeadOnGun but it has a simple guess factor that it
+ * uses to adjust the firing angle based on results from firing at a target.
  * @author dpower
  */
 public class HeadOnSlicerGun implements Gun {
 
 	private final double NUM_LENGTH_SEGMENTS;
-	private final double NUM_ARC_SEGMENTS;		    // keep this even
+	private final double NUM_ARC_SEGMENTS;		   		   		   		    // keep
+												   		   		   		    // this
+												   		   		   		    // even
 	private final double ARC_WIDTH_FACTOR;
 	private final int	 FIRING_ADJUSTMENT_HISTORY;
 
@@ -36,14 +40,15 @@ public class HeadOnSlicerGun implements Gun {
 
 		this.owningBot = owningBot;
 
-		// basically find out how far away two bots can get and keep the smaller
-		// of it or the radar radius
+		// basically find out how far away two bots can get and still see each
+		// other
 		this.sliceLength = Math.pow(this.owningBot.getBattleFieldWidth() - this.owningBot.getWidth(), 2);
 		this.sliceLength += Math.pow(this.owningBot.getBattleFieldHeight() - this.owningBot.getHeight(), 2);
 		this.sliceLength = Math.sqrt(this.sliceLength);
 		this.sliceLength = Math.min(Rules.RADAR_SCAN_RADIUS, this.sliceLength);
 
 		this.sliceSegmentLength = this.sliceLength / this.NUM_LENGTH_SEGMENTS;
+
 		this.arcSegmentSize = Math.atan(this.sliceLength / this.ARC_WIDTH_FACTOR);
 		this.halfArcAdjustment = this.arcSegmentSize * this.NUM_ARC_SEGMENTS / 2;
 	}
