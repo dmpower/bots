@@ -2,6 +2,8 @@ package com.ywp.robocode.utils;
 
 import java.awt.Graphics2D;
 import java.io.PrintStream;
+import java.util.HashMap;
+import java.util.Map;
 
 import robocode.AdvancedRobot;
 import robocode.BulletHitEvent;
@@ -15,9 +17,9 @@ import robocode.Rules;
 public class HeadOnSlicerGun implements Gun {
 
 	private final double NUM_LENGTH_SEGMENTS;
-	private final double NUM_ARC_SEGMENTS;		   		   		   		    // keep
-												   		   		   		    // this
-												   		   		   		    // even
+	private final double NUM_ARC_SEGMENTS;		   		   		   		   		    // keep
+		   		   		   		    // this
+		   		   		   		    // even
 	private final double ARC_WIDTH_FACTOR;
 	private final int	 FIRING_ADJUSTMENT_HISTORY;
 
@@ -26,6 +28,10 @@ public class HeadOnSlicerGun implements Gun {
 	private double		  sliceSegmentLength;
 	private double		  arcSegmentSize;
 	private double		  halfArcAdjustment;
+
+	private RepositoryManager<TargetBot>  targetRepository;
+	private RepositoryManager<BulletData> bullets = new RepositoryManager<>();
+	private static Map<String, GunStats>  stats	  = new HashMap<>();
 
 	public HeadOnSlicerGun(AdvancedRobot owningBot) {
 		this(owningBot, 4, 10, Rules.MAX_VELOCITY, 200);
