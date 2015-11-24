@@ -1,11 +1,16 @@
+/**
+ *
+ */
 package com.ywp.robocode.utils;
 
 import java.awt.Graphics2D;
 import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Vector;
 
 import robocode.AdvancedRobot;
+import robocode.Bullet;
 import robocode.BulletHitEvent;
 import robocode.Rules;
 
@@ -107,8 +112,31 @@ public class HeadOnSlicerGun implements Gun {
 	 */
 	@Override
 	public void update() {
-		// TODO Auto-generated method stub
+		Vector<RepositoryEntry<BulletData>> expired = new Vector<>();
+		for (String targetGroupId : this.bullets.getAllGroupIds()) {
+			TargetBot target = this.targetRepository.getAllData(targetGroupId).get(0);
+			for (BulletData bulletData : this.bullets.getAllData(targetGroupId)) {
+				Bullet bullet = bulletData.getBullet();
+				Point bulletLocation = new Point(bullet.getX(), bullet.getY());
+				Point owningBotPoint = BotTools.convertToPoint(owningBot);
+				if (!bullet.isActive() || owningBotPoint.distance(bulletLocation)> owningBotPoint.distance(target.getPoint())) {
+					expired.addElement(bulletData);
+					if (!HeadOnSlicerGun.stats.containsKey(targetGroupId)) {
+						this.owningBot.out
+								.println(this.getClass().getName() + " - new gun stats in update for " + targetGroupId);
+						HeadOnSlicerGun.stats.put(targetGroupId, new GunStats());
+					}
+					if (targetGroupId.equals(bullet.getVictim())) {
+						// basically if I hit my intended target, add a hit
+						HeadOnSlicerGun.stats.get(targetGroupId).addHit();
+					}
+					this.owningBot.out.println(this.getClass().getName() + " - time: " + this.owningBot.getTime()
+							+ " target: " + targetGroupId + " Bullet: " + bullet.toString());
+				}
+			}
+		}
 
+		this.bullets.remove(expired);
 	}
 
 	/*
@@ -118,7 +146,8 @@ public class HeadOnSlicerGun implements Gun {
 	@Override
 	public void update(BulletHitEvent event) {
 		// TODO Auto-generated method stub
-
+		// still do nothing? I may have to remove this if I don't find a need to
+		// use it.
 	}
 
 	/*
