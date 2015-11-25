@@ -17,24 +17,26 @@ import robocode.Rules;
 /**
  * This gun is similar to the HeadOnGun but it has a simple guess factor that it
  * uses to adjust the firing angle based on results from firing at a target.
+ *
  * @author dpower
  */
 public class HeadOnSlicerGun implements Gun {
 
-	private final double NUM_LENGTH_SEGMENTS;
-	private final double NUM_ARC_SEGMENTS;		   		   		   		   		    // keep
-		   		   		   		    // this
-		   		   		   		    // even
-	private final double ARC_WIDTH_FACTOR;
-	private final int	 FIRING_ADJUSTMENT_HISTORY;
+	private final double				  NUM_LENGTH_SEGMENTS;
+	private final double				  NUM_ARC_SEGMENTS;					  					  		   		   		   		   		    // keep
+	// this
+	// even
+	private final double				  ARC_WIDTH_FACTOR;
+	private final int					  FIRING_ADJUSTMENT_HISTORY;
 
-	private AdvancedRobot owningBot;
-	private double		  sliceLength;
-	private double		  sliceSegmentLength;
-	private double		  arcSegmentSize;
-	private double		  halfArcAdjustment;
+	private AdvancedRobot				  owningBot;
+	private double						  sliceLength;
+	private double						  sliceSegmentLength;
+	private double						  arcSegmentSize;
+	private double						  halfArcAdjustment;
 
 	private RepositoryManager<TargetBot>  targetRepository;
+	private TargetBot					  lastTarget;
 	private RepositoryManager<BulletData> bullets = new RepositoryManager<>();
 	private static Map<String, GunStats>  stats	  = new HashMap<>();
 
@@ -71,8 +73,8 @@ public class HeadOnSlicerGun implements Gun {
 	 */
 	@Override
 	public void feedTarget(TargetBot target) {
-		// TODO Auto-generated method stub
-
+		this.targetRepository.add(target);
+		this.lastTarget = target;
 	}
 
 	/*
@@ -118,8 +120,9 @@ public class HeadOnSlicerGun implements Gun {
 			for (BulletData bulletData : this.bullets.getAllData(targetGroupId)) {
 				Bullet bullet = bulletData.getBullet();
 				Point bulletLocation = new Point(bullet.getX(), bullet.getY());
-				Point owningBotPoint = BotTools.convertToPoint(owningBot);
-				if (!bullet.isActive() || owningBotPoint.distance(bulletLocation)> owningBotPoint.distance(target.getPoint())) {
+				Point owningBotPoint = BotTools.convertToPoint(this.owningBot);
+				if (!bullet.isActive()
+						|| owningBotPoint.distance(bulletLocation) > owningBotPoint.distance(target.getPoint())) {
 					expired.addElement(bulletData);
 					if (!HeadOnSlicerGun.stats.containsKey(targetGroupId)) {
 						this.owningBot.out
